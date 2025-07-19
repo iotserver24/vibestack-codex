@@ -2,7 +2,6 @@ import { BrowserWindow, type IpcMainInvokeEvent, ipcMain } from "electron";
 import git from "isomorphic-git";
 import http from "isomorphic-git/http/node";
 import fetch from "node-fetch"; // Use node-fetch for making HTTP requests in main process
-import { updateAppGithubRepo } from "../../db/index";
 import { readSettings, writeSettings } from "../../main/settings";
 
 import fs from "node:fs";
@@ -406,7 +405,13 @@ async function handleCreateRepo(
     appId,
     isPrivate = true,
     branch,
-  }: { org: string; repo: string; appId: number; isPrivate?: boolean; branch?: string },
+  }: {
+    org: string;
+    repo: string;
+    appId: number;
+    isPrivate?: boolean;
+    branch?: string;
+  },
 ): Promise<void> {
   // Get access token from settings
   const settings = readSettings();

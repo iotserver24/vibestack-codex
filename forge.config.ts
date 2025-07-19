@@ -9,46 +9,22 @@ import { FuseV1Options, FuseVersion } from "@electron/fuses";
 import { AutoUnpackNativesPlugin } from "@electron-forge/plugin-auto-unpack-natives";
 
 // Based on https://github.com/electron/forge/blob/6b2d547a7216c30fde1e1fddd1118eee5d872945/packages/plugin/vite/src/VitePlugin.ts#L124
-const ignore = (file: string) => {
-  if (!file) return false;
-  // `file` always starts with `/`
-  // @see - https://github.com/electron/packager/blob/v18.1.3/src/copy-filter.ts#L89-L93
-  if (file === "/node_modules") {
+// Add ignore function to prevent build issues
+const ignore = (path: string) => {
+  // Don't ignore the main entry point
+  if (path.includes(".vite/build/main.js")) {
     return false;
   }
-  if (file.startsWith("/drizzle")) {
-    return false;
-  }
-  if (file.startsWith("/scaffold")) {
-    return false;
-  }
-
-  if (file.startsWith("/worker") && !file.startsWith("/workers")) {
-    return false;
-  }
-  if (file.startsWith("/node_modules/stacktrace-js")) {
-    return false;
-  }
-  if (file.startsWith("/node_modules/stacktrace-js/dist")) {
-    return false;
-  }
-  if (file.startsWith("/node_modules/better-sqlite3")) {
-    return false;
-  }
-  if (file.startsWith("/node_modules/bindings")) {
-    return false;
-  }
-  if (file.startsWith("/node_modules/file-uri-to-path")) {
-    return false;
-  }
-  if (file.startsWith("/.vite") && !file.startsWith("/.vite/build")) {
-    return false;
-  }
-  if (file.startsWith("/.vite/build")) {
+  // Ignore node_modules except for native dependencies
+  if (
+    path.includes("node_modules") &&
+    !path.includes("better-sqlite3") &&
+    !path.includes("bindings") &&
+    !path.includes("file-uri-to-path")
+  ) {
     return true;
   }
-
-  return true;
+  return false;
 };
 
 const isEndToEndTestBuild = process.env.E2E_TEST_BUILD === "true";
@@ -75,7 +51,10 @@ const config: ForgeConfig = {
         : undefined,
     osxNotarize: isEndToEndTestBuild
       ? undefined
-      : isProductionBuild
+      : isProductionBuild &&
+          process.env.APPLE_ID &&
+          process.env.APPLE_PASSWORD &&
+          process.env.APPLE_TEAM_ID
         ? {
             appleId: process.env.APPLE_ID,
             appleIdPassword: process.env.APPLE_PASSWORD,
@@ -84,7 +63,6 @@ const config: ForgeConfig = {
         : undefined,
     asar: true,
     ignore,
-    // ignore: [/node_modules\/(?!(better-sqlite3|bindings|file-uri-to-path)\/)/],
   },
   rebuildConfig: {
     extraModules: ["better-sqlite3"],

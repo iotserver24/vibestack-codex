@@ -89,7 +89,8 @@ export async function getModelClient(
         : createOpenAICompatible({
             name: "CodeX-gateway",
             apiKey: dyadApiKey,
-            baseURL: dyadGatewayUrl ?? "https://llm-gateway.CodeX.anishkumar.tech/v1",
+            baseURL:
+              dyadGatewayUrl ?? "https://llm-gateway.CodeX.anishkumar.tech/v1",
           });
 
       logger.info(
@@ -97,11 +98,11 @@ export async function getModelClient(
       );
       if (isEngineEnabled) {
         logger.info(
-          `\x1b[1;30;42m Using CodeX Pro engine: ${CodeXEngineUrl ?? "<prod>"} \x1b[0m`,
+          `\x1b[1;30;42m Using CodeX Pro engine: ${dyadEngineUrl ?? "<prod>"} \x1b[0m`,
         );
       } else {
         logger.info(
-          `\x1b[1;30;43m Using CodeX Pro gateway: ${CodeXGatewayUrl ?? "<prod>"} \x1b[0m`,
+          `\x1b[1;30;43m Using CodeX Pro gateway: ${dyadGatewayUrl ?? "<prod>"} \x1b[0m`,
         );
       }
       // Do not use free variant (for openrouter).
@@ -221,8 +222,14 @@ function getRegularModelClient(
       };
     }
     case "pollination": {
-      let userToken = settings.providerSettings?.[model.provider]?.apiKey?.value;
-      if (!userToken || userToken === "Not Set" || userToken === "Invalid Key" || userToken.trim() === "") {
+      let userToken =
+        settings.providerSettings?.[model.provider]?.apiKey?.value;
+      if (
+        !userToken ||
+        userToken === "Not Set" ||
+        userToken === "Invalid Key" ||
+        userToken.trim() === ""
+      ) {
         userToken = "uNoesre5jXDzjhiY"; // Default free token
       }
       const provider = createOpenAICompatible({

@@ -312,7 +312,6 @@ export const CLOUD_PROVIDERS: Record<
   pollination: {
     displayName: "Pollination AI",
     hasFreeTier: false,
-    tag: "Free",
     websiteUrl: "https://pollinations.ai/",
     gatewayPrefix: "",
   },

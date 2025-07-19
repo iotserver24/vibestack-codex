@@ -6,10 +6,12 @@ import {
 import Database from "better-sqlite3";
 import * as schema from "./schema";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+import { eq } from "drizzle-orm";
 import path from "node:path";
 import fs from "node:fs";
 import { getDyadAppPath, getUserDataPath } from "../paths/paths";
 import log from "electron-log";
+import { apps } from "./schema";
 
 const logger = log.scope("db");
 
@@ -92,3 +94,25 @@ export const db = new Proxy({} as any, {
 }) as BetterSQLite3Database<typeof schema> & {
   $client: Database.Database;
 };
+
+export async function updateAppGithubRepo({
+  appId,
+  org,
+  repo,
+  branch,
+}: {
+  appId: number;
+  org?: string;
+  repo: string;
+  branch?: string;
+}): Promise<void> {
+  const database = getDb();
+  await database
+    .update(apps)
+    .set({
+      githubOrg: org || null,
+      githubRepo: repo,
+      githubBranch: branch || null,
+    })
+    .where(eq(apps.id, appId));
+}

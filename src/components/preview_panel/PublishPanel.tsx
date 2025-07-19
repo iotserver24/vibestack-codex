@@ -96,11 +96,7 @@ export const PublishPanel = () => {
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Sync your code to GitHub for collaboration.
             </p>
-            <GitHubConnector
-              appId={selectedAppId}
-              folderName={app.name}
-              expanded={true}
-            />
+            <GitHubConnector appId={selectedAppId} folderName={app.name} />
           </CardContent>
         </Card>
 
