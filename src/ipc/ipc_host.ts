@@ -26,7 +26,14 @@ import { registerCapacitorHandlers } from "./handlers/capacitor_handlers";
 import { registerProblemsHandlers } from "./handlers/problems_handlers";
 import { registerAppEnvVarsHandlers } from "./handlers/app_env_vars_handlers";
 
+let handlersRegistered = false;
+
 export function registerIpcHandlers() {
+  // Prevent duplicate registration
+  if (handlersRegistered) {
+    return;
+  }
+
   // Register all IPC handlers by category
   registerAppHandlers();
   registerChatHandlers();
@@ -55,4 +62,6 @@ export function registerIpcHandlers() {
   registerAppUpgradeHandlers();
   registerCapacitorHandlers();
   registerAppEnvVarsHandlers();
+
+  handlersRegistered = true;
 }

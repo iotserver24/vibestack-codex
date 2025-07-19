@@ -18,9 +18,13 @@ import { BackupManager } from "./backup_manager";
 import { getDatabasePath, initializeDatabase } from "./db";
 import { UserSettings } from "./lib/schemas";
 
-log.errorHandler.startCatching();
-log.eventLogger.startLogging();
-log.scope.labelPadding = false;
+// Prevent duplicate electron-log initialization
+if (!global.electronLogInitialized) {
+  log.errorHandler.startCatching();
+  log.eventLogger.startLogging();
+  log.scope.labelPadding = false;
+  global.electronLogInitialized = true;
+}
 
 const logger = log.scope("main");
 
@@ -120,6 +124,7 @@ async function promptMoveToApplicationsFolder(): Promise<void> {
 
 declare global {
   const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
+  var electronLogInitialized: boolean;
 }
 
 let mainWindow: BrowserWindow | null = null;
