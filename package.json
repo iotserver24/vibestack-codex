@@ -1,7 +1,7 @@
 {
   "name": "vibestack-codex",
   "productName": "VibeStack-Codex",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "VibeStacks - Modern collaborative AI platform",
   "main": ".vite/build/main.js",
   "repository": {

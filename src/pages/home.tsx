@@ -1,33 +1,22 @@
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useSearch, useNavigate } from "@tanstack/react-router";
 import { useAtom, useSetAtom } from "jotai";
-import { homeChatInputValueAtom } from "../atoms/chatAtoms";
+import { homeChatInputValueAtom } from "@/atoms/chatAtoms";
 import { selectedAppIdAtom } from "@/atoms/appAtoms";
-import { IpcClient } from "@/ipc/ipc_client";
-import { generateCuteAppName } from "@/lib/utils";
+import { isPreviewOpenAtom } from "@/atoms/uiAtoms";
 import { useLoadApps } from "@/hooks/useLoadApps";
 import { useSettings } from "@/hooks/useSettings";
-import { SetupBanner } from "@/components/SetupBanner";
-import { isPreviewOpenAtom } from "@/atoms/viewAtoms";
-import { useState, useEffect, useCallback } from "react";
 import { useStreamChat } from "@/hooks/useStreamChat";
-import { HomeChatInput } from "@/components/chat/HomeChatInput";
-import { usePostHog } from "posthog-js/react";
-// import { PrivacyBanner } from "@/components/TelemetryBanner";
-import { INSPIRATION_PROMPTS } from "@/prompts/inspiration_prompts";
 import { useAppVersion } from "@/hooks/useAppVersion";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { useTheme } from "@/contexts/ThemeContext";
-import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
-import { ImportAppButton } from "@/components/ImportAppButton";
-import { showError } from "@/lib/toast";
-import { invalidateAppQuery } from "@/hooks/useLoadApp";
 import { useQueryClient } from "@tanstack/react-query";
+import { usePostHog } from "posthog-js/react";
+import { useState, useEffect } from "react";
+import { IpcClient } from "@/ipc/ipc_client";
+import { INSPIRATION_PROMPTS } from "@/prompts/inspiration_prompts";
+import { useTheme } from "@/contexts/ThemeContext";
+import { ImportAppButton } from "@/components/ImportAppButton";
+import { HomeChatInput } from "@/components/chat/HomeChatInput";
+import { generateCuteAppName } from "@/lib/utils";
+import { showError } from "@/lib/toast";
 
 // Adding an export for attachments
 export interface HomeSubmitOptions {
@@ -46,39 +35,35 @@ export default function HomePage() {
   const { streamMessage } = useStreamChat({ hasChatId: false });
   const posthog = usePostHog();
   const appVersion = useAppVersion();
-  const [releaseNotesOpen, setReleaseNotesOpen] = useState(false);
-  const [releaseUrl, setReleaseUrl] = useState("");
   const { theme } = useTheme();
   const queryClient = useQueryClient();
   useEffect(() => {
-    const updateLastVersionLaunched = async () => {
-      if (
-        appVersion &&
-        settings &&
-        settings.lastShownReleaseNotesVersion !== appVersion
-      ) {
-        await updateSettings({
-          lastShownReleaseNotesVersion: appVersion,
-        });
-
-        try {
-          const result = await IpcClient.getInstance().doesReleaseNoteExist({
-            version: appVersion,
-          });
-
-          if (result.exists && result.url) {
-            setReleaseUrl(result.url + "?hideHeader=true&theme=" + theme);
-            setReleaseNotesOpen(true);
-          }
-        } catch (err) {
-          console.warn(
-            "Unable to check if release note exists for: " + appVersion,
-            err,
-          );
-        }
-      }
-    };
-    updateLastVersionLaunched();
+    // const updateLastVersionLaunched = async () => {
+    //   if (
+    //     appVersion &&
+    //     settings &&
+    //     settings.lastShownReleaseNotesVersion !== appVersion
+    //   ) {
+    //     await updateSettings({
+    //       lastShownReleaseNotesVersion: appVersion,
+    //     });
+    //     try {
+    //       const result = await IpcClient.getInstance().doesReleaseNoteExist({
+    //         version: appVersion,
+    //       });
+    //       if (result.exists && result.url) {
+    //         setReleaseUrl(result.url + "?hideHeader=true&theme=" + theme);
+    //         setReleaseNotesOpen(true);
+    //       }
+    //     } catch (err) {
+    //       console.warn(
+    //         "Unable to check if release note exists for: " + appVersion,
+    //         err,
+    //       );
+    //     }
+    //   }
+    // };
+    // updateLastVersionLaunched();
   }, [appVersion, settings, updateSettings, theme]);
 
   // Get the appId from search params
@@ -169,7 +154,7 @@ export default function HomePage() {
   // Main Home Page Content
   return (
     <div className="flex flex-col items-center justify-center max-w-3xl m-auto p-8">
-      <SetupBanner />
+      {/* <SetupBanner /> */}
 
       <div className="w-full">
         <ImportAppButton />
@@ -233,7 +218,7 @@ export default function HomePage() {
       {/* <PrivacyBanner /> */}
 
       {/* Release Notes Dialog */}
-      <Dialog open={releaseNotesOpen} onOpenChange={setReleaseNotesOpen}>
+      {/* <Dialog open={releaseNotesOpen} onOpenChange={setReleaseNotesOpen}>
         <DialogContent className="max-w-4xl bg-(--docs-bg) pr-0 pt-4 pl-4 gap-1">
           <DialogHeader>
             <DialogTitle>What's new in v{appVersion}?</DialogTitle>
@@ -263,7 +248,7 @@ export default function HomePage() {
             )}
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </div>
   );
 }

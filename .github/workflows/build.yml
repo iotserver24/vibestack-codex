@@ -1,4 +1,4 @@
-name: Build and Release Codex v1.0.2
+name: Build and Release Codex v1.0.3
 
 on:
   push:
@@ -84,15 +84,15 @@ jobs:
       - name: Publish GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.0.0
-          name: Release v1.0.0
+          tag: v1.0.3
+          name: Release v1.0.3
           owner: iotserver24
-          repo: codex
+          repo: vibestack-codex
           allowUpdates: true
           removeArtifacts: false
           replacesArtifacts: true
           makeLatest: true
-          token: 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
+          token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: |
             artifacts/*.deb
             artifacts/*.rpm
