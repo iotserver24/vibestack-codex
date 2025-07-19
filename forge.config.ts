@@ -57,8 +57,8 @@ const config: ForgeConfig = {
       certificateFile: undefined,
       certificatePassword: undefined,
     }),
-    // Windows ZIP - Universal build
-    new MakerZIP({}, ["win32"]),
+    // Windows ZIP - Universal build (temporarily disabled due to DLL issues)
+    // new MakerZIP({}, ["win32"]),
     // macOS - Universal build (x64 + arm64)
     new MakerZIP({}, ["darwin"]),
     // macOS DMG - Universal build

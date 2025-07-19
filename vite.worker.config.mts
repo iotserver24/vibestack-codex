@@ -26,4 +26,6 @@ export default defineConfig({
     // outDir: "dist/workers/tsc",
     // emptyOutDir: true,
   },
+  // Explicitly exclude vibestacks-coder directory to prevent build conflicts
+  exclude: ["vibestacks-coder/**"],
 });

@@ -11,4 +11,6 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Explicitly exclude vibestacks-coder directory to prevent build conflicts
+  exclude: ["vibestacks-coder/**"],
 });

@@ -13,6 +13,7 @@
   },
   "scripts": {
     "clean": "rimraf out scaffold/node_modules",
+    "clean:all": "node scripts/clean-build-artifacts.js",
     "start": "electron-forge start",
     "dev:engine": "VIBESTACKS_LOCAL_ENGINE=http://localhost:8080/v1 npm start",
     "staging:engine": "VIBESTACKS_LOCAL_ENGINE=https://staging---dyad-llm-engine-kq7pivehnq-uc.a.run.app/v1 npm start",
