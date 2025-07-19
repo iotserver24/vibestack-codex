@@ -1,31 +1,30 @@
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import {
   BookOpenIcon,
   BugIcon,
-  UploadIcon,
   ChevronLeftIcon,
   CheckIcon,
   XIcon,
-  FileIcon,
-  Gift,
   RefreshCw,
-  ExternalLink,
   Info,
+  Gift,
+  ExternalLink,
+  Copy,
 } from "lucide-react";
-import { IpcClient } from "@/ipc/ipc_client";
-import { useState, useEffect } from "react";
-import { useAtomValue } from "jotai";
-import { selectedChatIdAtom } from "@/atoms/chatAtoms";
-import { ChatLogsData } from "@/ipc/ipc_types";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { showError } from "@/lib/toast";
+import { useState, useEffect } from "react";
+import { ChatLogsData } from "@/ipc/ipc_types";
+import { IpcClient } from "@/ipc/ipc_client";
+import { useSettings } from "@/hooks/useSettings";
+import type { UpdateCheckResult } from "@/ipc/ipc_types";
 
 interface HelpDialogProps {
   isOpen: boolean;
@@ -33,20 +32,22 @@ interface HelpDialogProps {
 }
 
 export function HelpDialog({ isOpen, onClose }: HelpDialogProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [reviewMode, setReviewMode] = useState(false);
-  const [chatLogsData, setChatLogsData] = useState<ChatLogsData | null>(null);
-  const [uploadComplete, setUploadComplete] = useState(false);
-  const [sessionId, setSessionId] = useState("");
   const [updateInfo, setUpdateInfo] = useState<null | {
     version: string;
     releaseNotes: string;
     downloadUrl: string;
   }>(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [appVersion, setAppVersion] = useState<string | null>(null);
-  const selectedChatId = useAtomValue(selectedChatIdAtom);
+  const { settings } = useSettings();
+
+  // Add missing state variables
+  const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [reviewMode, setReviewMode] = useState(false);
+  const [chatLogsData, setChatLogsData] = useState<ChatLogsData | null>(null);
+  const [uploadComplete, setUploadComplete] = useState(false);
+  const [sessionId, setSessionId] = useState("");
+  const [appVersionState, setAppVersion] = useState<string | null>(null);
 
   // Function to reset all dialog state
   const resetDialogState = () => {
@@ -96,7 +97,7 @@ export function HelpDialog({ isOpen, onClose }: HelpDialogProps) {
 <!-- What actually happened? -->
 
 ## System Information
-- Dyad Version: ${debugInfo.dyadVersion}
+- CodeX Version: ${debugInfo.dyadVersion}
 - Platform: ${debugInfo.platform}
 - Architecture: ${debugInfo.architecture}
 - Node Version: ${debugInfo.nodeVersion || "n/a"}
@@ -126,31 +127,6 @@ ${debugInfo.logs.slice(-3_500) || "No logs available"}
       );
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleUploadChatSession = async () => {
-    if (!selectedChatId) {
-      alert("Please select a chat first");
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      // Get chat logs (includes debug info, chat data, and codebase)
-      const chatLogs =
-        await IpcClient.getInstance().getChatLogs(selectedChatId);
-
-      // Store data for review and switch to review mode
-      setChatLogsData(chatLogs);
-      setReviewMode(true);
-    } catch (error) {
-      console.error("Failed to upload chat session:", error);
-      alert(
-        "Failed to upload chat session. Please try again or report manually.",
-      );
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -244,8 +220,17 @@ Session ID: ${sessionId}
 
   const handleCheckForUpdates = async () => {
     try {
-      const data = await IpcClient.getInstance().checkForUpdates();
-      if (!appVersion) return;
+      const data: UpdateCheckResult =
+        await IpcClient.getInstance().checkForUpdates();
+      if (!appVersionState || !settings) {
+        showError("Could not determine current app version or settings.");
+        return;
+      }
+
+      // Get the appropriate channel based on user settings
+      const channel = settings.releaseChannel === "beta" ? "beta" : "stable";
+      const channelData = data[channel];
+
       const isNewer = (a: string, b: string) => {
         const pa = a.split(".").map(Number);
         const pb = b.split(".").map(Number);
@@ -255,11 +240,12 @@ Session ID: ${sessionId}
         }
         return false;
       };
-      if (isNewer(appVersion, data.version)) {
+
+      if (isNewer(appVersionState, channelData.version)) {
         setUpdateInfo({
-          version: data.version,
-          releaseNotes: data.releaseNotes,
-          downloadUrl: data.downloadUrl,
+          version: channelData.version,
+          releaseNotes: channelData.releaseNotes,
+          downloadUrl: channelData.downloadUrl,
         });
         setShowUpdateModal(true);
       } else {
@@ -297,7 +283,7 @@ Session ID: ${sessionId}
               Chat Logs Uploaded Successfully
             </h3>
             <div className="bg-slate-100 dark:bg-slate-800 p-3 rounded flex items-center space-x-2 font-mono text-sm">
-              <FileIcon
+              <Copy
                 className="h-4 w-4 cursor-pointer"
                 onClick={async () => {
                   try {
@@ -378,7 +364,7 @@ Session ID: ${sessionId}
             <div className="border rounded-md p-3">
               <h3 className="font-medium mb-2">System Information</h3>
               <div className="text-sm bg-slate-50 dark:bg-slate-900 rounded p-2 max-h-32 overflow-y-auto">
-                <p>Dyad Version: {chatLogsData.debugInfo.dyadVersion}</p>
+                <p>CodeX Version: {chatLogsData.debugInfo.dyadVersion}</p>
                 <p>Platform: {chatLogsData.debugInfo.platform}</p>
                 <p>Architecture: {chatLogsData.debugInfo.architecture}</p>
                 <p>
@@ -427,7 +413,11 @@ Session ID: ${sessionId}
             <Button
               variant="outline"
               className="w-full flex items-center justify-start gap-2 text-lg py-4"
-              onClick={() => IpcClient.getInstance().openExternalUrl("https://codex.anishkumar.tech/docs")}
+              onClick={() =>
+                IpcClient.getInstance().openExternalUrl(
+                  "https://codex.anishkumar.tech/docs",
+                )
+              }
             >
               <BookOpenIcon className="h-5 w-5" />
               Open Docs
@@ -447,7 +437,8 @@ Session ID: ${sessionId}
               Report a Bug
             </Button>
             <div className="text-sm text-muted-foreground">
-              We'll auto-fill your report with system info and logs. You can review it for any sensitive info before submitting.
+              We'll auto-fill your report with system info and logs. You can
+              review it for any sensitive info before submitting.
             </div>
           </div>
         </div>
@@ -460,13 +451,13 @@ Session ID: ${sessionId}
             <Gift className="w-5 h-5" /> Donate
             <ExternalLink className="w-4 h-4 ml-1 opacity-60" />
           </Button>
-            <Button
-              variant="outline"
+          <Button
+            variant="outline"
             className="w-full flex items-center justify-start gap-2 text-lg py-3"
             onClick={handleCheckForUpdates}
-            >
+          >
             <RefreshCw className="w-5 h-5" /> Check for Updates
-            </Button>
+          </Button>
         </div>
         {/* Update Modal */}
         <Dialog open={showUpdateModal} onOpenChange={setShowUpdateModal}>
@@ -495,7 +486,10 @@ Session ID: ${sessionId}
               >
                 Download Update
               </Button>
-              <Button variant="outline" onClick={() => setShowUpdateModal(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowUpdateModal(false)}
+              >
                 Remind Me Later
               </Button>
             </DialogFooter>

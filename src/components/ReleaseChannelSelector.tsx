@@ -27,7 +27,9 @@ export function ReleaseChannelSelector() {
         action: {
           label: "Download Stable",
           onClick: () => {
-            IpcClient.getInstance().openExternalUrl("https://codex.anishkumar.tech/download");
+            IpcClient.getInstance().openExternalUrl(
+              "https://codex.anishkumar.tech/download",
+            );
           },
         },
       });

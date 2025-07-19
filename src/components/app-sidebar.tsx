@@ -1,4 +1,14 @@
-import { Home, Inbox, Settings, HelpCircle, Store, Gift, ExternalLink, RefreshCw, Info } from "lucide-react";
+import {
+  Home,
+  Inbox,
+  Settings,
+  HelpCircle,
+  Store,
+  Gift,
+  ExternalLink,
+  RefreshCw,
+  Info,
+} from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useSidebar } from "@/components/ui/sidebar"; // import useSidebar hook
 import { useEffect, useState, useRef } from "react";
@@ -6,6 +16,9 @@ import { useAtom } from "jotai";
 import { dropdownOpenAtom } from "@/atoms/uiAtoms";
 import { showError } from "@/lib/toast";
 import { toast } from "@/lib/toast";
+import { useSettings } from "@/hooks/useSettings";
+import { IpcClient } from "@/ipc/ipc_client";
+import type { UpdateCheckResult } from "@/ipc/ipc_types";
 
 import {
   Sidebar,
@@ -23,7 +36,6 @@ import { ChatList } from "./ChatList";
 import { AppList } from "./AppList";
 import { HelpDialog } from "./HelpDialog"; // Import the new dialog
 import { SettingsList } from "./SettingsList";
-import { IpcClient } from "@/ipc/ipc_client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 // Menu items.
@@ -71,6 +83,7 @@ export function AppSidebar() {
   }>(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [appVersion, setAppVersion] = useState<string | null>(null);
+  const { settings } = useSettings();
 
   useEffect(() => {
     IpcClient.getInstance().getAppVersion?.().then(setAppVersion);
@@ -79,8 +92,14 @@ export function AppSidebar() {
   useEffect(() => {
     (async () => {
       try {
-        const data = await IpcClient.getInstance().checkForUpdates();
-        if (!appVersion) return;
+        const data: UpdateCheckResult =
+          await IpcClient.getInstance().checkForUpdates();
+        if (!appVersion || !settings) return;
+
+        // Get the appropriate channel based on user settings
+        const channel = settings.releaseChannel === "beta" ? "beta" : "stable";
+        const channelData = data[channel];
+
         const isNewer = (a: string, b: string) => {
           const pa = a.split(".").map(Number);
           const pb = b.split(".").map(Number);
@@ -90,11 +109,12 @@ export function AppSidebar() {
           }
           return false;
         };
-        if (isNewer(appVersion, data.version)) {
+
+        if (isNewer(appVersion, channelData.version)) {
           setUpdateInfo({
-            version: data.version,
-            releaseNotes: data.releaseNotes,
-            downloadUrl: data.downloadUrl,
+            version: channelData.version,
+            releaseNotes: channelData.releaseNotes,
+            downloadUrl: channelData.downloadUrl,
           });
           setShowUpdateModal(true);
         }
@@ -104,12 +124,21 @@ export function AppSidebar() {
     })();
     // Only run on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appVersion]);
+  }, [appVersion, settings?.releaseChannel]);
 
   const handleCheckForUpdates = async () => {
     try {
-      const data = await IpcClient.getInstance().checkForUpdates();
-      if (!appVersion) return;
+      const data: UpdateCheckResult =
+        await IpcClient.getInstance().checkForUpdates();
+      if (!appVersion || !settings) {
+        showError("Could not determine current app version or settings.");
+        return;
+      }
+
+      // Get the appropriate channel based on user settings
+      const channel = settings.releaseChannel === "beta" ? "beta" : "stable";
+      const channelData = data[channel];
+
       const isNewer = (a: string, b: string) => {
         const pa = a.split(".").map(Number);
         const pb = b.split(".").map(Number);
@@ -119,15 +148,17 @@ export function AppSidebar() {
         }
         return false;
       };
-      if (isNewer(appVersion, data.version)) {
+
+      if (isNewer(appVersion, channelData.version)) {
         setUpdateInfo({
-          version: data.version,
-          releaseNotes: data.releaseNotes,
-          downloadUrl: data.downloadUrl,
+          version: channelData.version,
+          releaseNotes: channelData.releaseNotes,
+          downloadUrl: channelData.downloadUrl,
         });
         setShowUpdateModal(true);
       } else {
-        toast.success?.("You are using the latest version.") || toast("You are using the latest version.");
+        toast.success?.("You are using the latest version.") ||
+          toast("You are using the latest version.");
       }
     } catch (e: any) {
       showError(e?.message || "Failed to check for updates.");
@@ -240,7 +271,7 @@ export function AppSidebar() {
           className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-sidebar-accent text-sm mt-2"
           onClick={() => {
             IpcClient.getInstance().openExternalUrl(
-              "https://codex.anishkumar.tech/docs/support#-one-time-donations"
+              "https://codex.anishkumar.tech/docs/support#-one-time-donations",
             );
           }}
         >
@@ -270,7 +301,9 @@ export function AppSidebar() {
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                 onClick={() => {
                   if (updateInfo?.downloadUrl) {
-                    IpcClient.getInstance().openExternalUrl(updateInfo.downloadUrl);
+                    IpcClient.getInstance().openExternalUrl(
+                      updateInfo.downloadUrl,
+                    );
                   }
                 }}
               >

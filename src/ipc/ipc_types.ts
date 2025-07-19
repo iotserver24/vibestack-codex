@@ -316,3 +316,14 @@ export interface VercelProject {
   name: string;
   framework: string | null;
 }
+
+export interface UpdateInfo {
+  version: string;
+  downloadUrl: string;
+  releaseNotes: string;
+}
+
+export interface UpdateCheckResult {
+  stable: UpdateInfo;
+  beta: UpdateInfo;
+}
