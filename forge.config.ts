@@ -41,8 +41,11 @@ const ignore = (file: string) => {
   if (file.startsWith("/node_modules/file-uri-to-path")) {
     return false;
   }
-  if (file.startsWith("/.vite")) {
+  if (file.startsWith("/.vite") && !file.startsWith("/.vite/build")) {
     return false;
+  }
+  if (file.startsWith("/.vite/build")) {
+    return true;
   }
 
   return true;

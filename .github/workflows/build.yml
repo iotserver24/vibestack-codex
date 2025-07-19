@@ -21,6 +21,7 @@ jobs:
           npm run make
         env:
           E2E_TEST_BUILD: "true"
+
       - name: Debug Build Output (Linux)
         run: |
           echo "=== Build Output Structure ==="
