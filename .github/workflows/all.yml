@@ -1,0 +1,37 @@
+name: Build Codex App
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [
+          { name: "windows", image: "windows-latest" },
+          { name: "linux", image: "ubuntu-22.04" },
+          { name: "macos", image: "macos-15" }
+        ]
+    runs-on: ${{ matrix.os.image }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app with Electron Forge
+        run: npm run make
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: codex-${{ matrix.os.name }}
+          path: out/make/**
