@@ -15,15 +15,9 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-      - name: Clear npm cache and install dependencies
-        run: |
-          npm cache clean --force
-          rm -rf node_modules package-lock.json
-          npm ci
-        env:
-          NODE_ENV: "production"
       - name: Install & Build (Linux)
         run: |
+          npm ci
           npm run make
         env:
           NODE_ENV: "production"
@@ -51,15 +45,9 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-      - name: Clear npm cache and install dependencies
-        run: |
-          npm cache clean --force
-          rm -rf node_modules package-lock.json
-          npm ci
-        env:
-          NODE_ENV: "production"
       - name: Install & Build (macOS)
         run: |
+          npm ci
           npm run make
         env:
           NODE_ENV: "production"
@@ -86,16 +74,9 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-      - name: Clear npm cache and install dependencies
-        run: |
-          npm cache clean --force
-          Remove-Item -Recurse -Force node_modules -ErrorAction SilentlyContinue
-          Remove-Item package-lock.json -ErrorAction SilentlyContinue
-          npm ci
-        env:
-          NODE_ENV: "production"
       - name: Install & Build (Windows)
         run: |
+          npm ci
           npm run make
         env:
           NODE_ENV: "production"

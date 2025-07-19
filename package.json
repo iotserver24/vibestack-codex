@@ -12,14 +12,14 @@
     "node": ">=20"
   },
   "scripts": {
-    "clean": "npx rimraf out scaffold/node_modules",
-    "start": "npx electron-forge start",
+    "clean": "rimraf out scaffold/node_modules",
+    "start": "electron-forge start",
     "dev:engine": "VIBESTACKS_LOCAL_ENGINE=http://localhost:8080/v1 npm start",
     "staging:engine": "VIBESTACKS_LOCAL_ENGINE=https://staging---dyad-llm-engine-kq7pivehnq-uc.a.run.app/v1 npm start",
     "staging:gateway": "VIBESTACKS_GATEWAY_URL=https://staging---litellm-gcp-cloud-run-kq7pivehnq-uc.a.run.app/v1 npm start",
-    "package": "npm run clean && npx electron-forge package",
-    "make": "npm run clean && npx electron-forge make",
-    "publish": "npm run clean && npx electron-forge publish",
+    "package": "npm run clean && electron-forge package",
+    "make": "npm run clean && electron-forge make",
+    "publish": "npm run clean && electron-forge publish",
     "ts": "npm run ts:main && npm run ts:workers",
     "ts:main": "npx tsc -p tsconfig.app.json --noEmit",
     "ts:workers": "npx tsc -p workers/tsc/tsconfig.json --noEmit",
@@ -35,7 +35,7 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "extract-codebase": "ts-node scripts/extract-codebase.ts",
-    "prepare": "if [ -z \"$CI\" ]; then husky install; fi",
+    "prepare": "husky install",
     "pre:e2e": "cross-env E2E_TEST_BUILD=true npm run package",
     "e2e": "playwright test"
   },
