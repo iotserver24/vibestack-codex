@@ -6,7 +6,6 @@ import { MakerRpm } from "@electron-forge/maker-rpm";
 import { VitePlugin } from "@electron-forge/plugin-vite";
 import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { FuseV1Options, FuseVersion } from "@electron/fuses";
-import { AutoUnpackNativesPlugin } from "@electron-forge/plugin-auto-unpack-natives";
 
 // Based on https://github.com/electron/forge/blob/6b2d547a7216c30fde1e1fddd1118eee5d872945/packages/plugin/vite/src/VitePlugin.ts#L124
 // Add ignore function to prevent build issues
@@ -15,13 +14,18 @@ const ignore = (path: string) => {
   if (path.includes(".vite/build/main.js")) {
     return false;
   }
-  // Ignore node_modules except for native dependencies
-  if (
-    path.includes("node_modules") &&
-    !path.includes("better-sqlite3") &&
-    !path.includes("bindings") &&
-    !path.includes("file-uri-to-path")
-  ) {
+  // Don't ignore better-sqlite3 and its dependencies
+  if (path.includes("better-sqlite3")) {
+    return false;
+  }
+  if (path.includes("bindings")) {
+    return false;
+  }
+  if (path.includes("file-uri-to-path")) {
+    return false;
+  }
+  // Ignore other node_modules
+  if (path.includes("node_modules")) {
     return true;
   }
   return false;
@@ -61,7 +65,7 @@ const config: ForgeConfig = {
             teamId: process.env.APPLE_TEAM_ID,
           }
         : undefined,
-    asar: true,
+    asar: false,
     ignore,
   },
   rebuildConfig: {
@@ -96,7 +100,6 @@ const config: ForgeConfig = {
     },
   ],
   plugins: [
-    new AutoUnpackNativesPlugin({}),
     new VitePlugin({
       // `build` can specify multiple entry builds, which can be Main process, Preload scripts, Worker process, etc.
       // If you are familiar with Vite configuration, it will look really familiar.

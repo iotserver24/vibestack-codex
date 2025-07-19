@@ -48,35 +48,51 @@ if (process.defaultApp) {
 
 export async function onReady() {
   try {
+    logger.info("App is ready, starting initialization...");
+
     const backupManager = new BackupManager({
       settingsFile: getSettingsFilePath(),
       dbFile: getDatabasePath(),
     });
     await backupManager.initialize();
-  } catch (e) {
-    logger.error("Error initializing backup manager", e);
-  }
-  initializeDatabase();
-  const settings = readSettings();
-  await onFirstRunMaybe(settings);
-  createWindow();
+    logger.info("Backup manager initialized");
 
-  logger.info("Auto-update enabled=", settings.enableAutoUpdate);
-  if (settings.enableAutoUpdate) {
-    // Technically we could just pass the releaseChannel directly to the host,
-    // but this is more explicit and falls back to stable if there's an unknown
-    // release channel.
-    const postfix = settings.releaseChannel === "beta" ? "beta" : "stable";
-    const host = `https://api.codex.anishkumar.tech/v1/update/${postfix}`;
-    logger.info("Auto-update release channel=", postfix);
-    updateElectronApp({
-      logger,
-      updateSource: {
-        type: UpdateSourceType.ElectronPublicUpdateService,
-        repo: "iotserver24/codex",
-        host,
-      },
-    }); // additional configuration options available
+    initializeDatabase();
+    logger.info("Database initialized");
+
+    const settings = readSettings();
+    logger.info("Settings loaded");
+
+    await onFirstRunMaybe(settings);
+    logger.info("First run check completed");
+
+    createWindow();
+    logger.info("Window created");
+
+    logger.info("Auto-update enabled=", settings.enableAutoUpdate);
+    if (settings.enableAutoUpdate) {
+      // Technically we could just pass the releaseChannel directly to the host,
+      // but this is more explicit and falls back to stable if there's an unknown
+      // release channel.
+      const postfix = settings.releaseChannel === "beta" ? "beta" : "stable";
+      const host = `https://api.codex.anishkumar.tech/v1/update/${postfix}`;
+      logger.info("Auto-update release channel=", postfix);
+      updateElectronApp({
+        logger,
+        updateSource: {
+          type: UpdateSourceType.ElectronPublicUpdateService,
+          repo: "iotserver24/codex",
+          host,
+        },
+      }); // additional configuration options available
+    }
+  } catch (error) {
+    logger.error("Error in onReady:", error);
+    // Show error dialog to user
+    dialog.showErrorBox(
+      "Startup Error",
+      `Failed to start application: ${error}`,
+    );
   }
 }
 
@@ -129,36 +145,85 @@ declare global {
 let mainWindow: BrowserWindow | null = null;
 
 const createWindow = () => {
-  // Create the browser window.
-  mainWindow = new BrowserWindow({
-    width: process.env.NODE_ENV === "development" ? 1280 : 960,
-    height: 700,
-    titleBarStyle: "hidden",
-    titleBarOverlay: false,
-    trafficLightPosition: {
-      x: 10,
-      y: 8,
-    },
-    webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-      preload: path.join(__dirname, "preload.js"),
-      // transparent: true,
-    },
-    // backgroundColor: "#00000001",
-    // frame: false,
-  });
-  // and load the index.html of the app.
-  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
-  } else {
-    mainWindow.loadFile(
-      path.join(__dirname, "../renderer/main_window/index.html"),
+  try {
+    logger.info("Creating browser window...");
+
+    // Create the browser window.
+    mainWindow = new BrowserWindow({
+      width: process.env.NODE_ENV === "development" ? 1280 : 960,
+      height: 700,
+      titleBarStyle: "hidden",
+      titleBarOverlay: false,
+      trafficLightPosition: {
+        x: 10,
+        y: 8,
+      },
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        preload: path.join(__dirname, "preload.js"),
+        // transparent: true,
+      },
+      // backgroundColor: "#00000001",
+      // frame: false,
+    });
+
+    logger.info("Browser window created, loading content...");
+
+    // and load the index.html of the app.
+    if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+      logger.info(
+        "Loading from dev server URL:",
+        MAIN_WINDOW_VITE_DEV_SERVER_URL,
+      );
+      mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+    } else {
+      const filePath = path.join(
+        __dirname,
+        "../renderer/main_window/index.html",
+      );
+      logger.info("Loading from file path:", filePath);
+      mainWindow.loadFile(filePath);
+    }
+
+    if (process.env.NODE_ENV === "development") {
+      // Open the DevTools.
+      mainWindow.webContents.openDevTools();
+    }
+
+    // Add event listeners for debugging
+    mainWindow.on("ready-to-show", () => {
+      logger.info("Window is ready to show");
+      mainWindow?.show();
+    });
+
+    mainWindow.on("closed", () => {
+      logger.info("Window closed");
+      mainWindow = null;
+    });
+
+    mainWindow.webContents.on(
+      "did-fail-load",
+      (event, errorCode, errorDescription) => {
+        logger.error(
+          "Failed to load window content:",
+          errorCode,
+          errorDescription,
+        );
+        dialog.showErrorBox(
+          "Load Error",
+          `Failed to load application: ${errorDescription}`,
+        );
+      },
     );
-  }
-  if (process.env.NODE_ENV === "development") {
-    // Open the DevTools.
-    mainWindow.webContents.openDevTools();
+
+    logger.info("Window creation completed successfully");
+  } catch (error) {
+    logger.error("Error creating window:", error);
+    dialog.showErrorBox(
+      "Window Creation Error",
+      `Failed to create window: ${error}`,
+    );
   }
 };
 
