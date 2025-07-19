@@ -6,6 +6,7 @@ import { MakerRpm } from "@electron-forge/maker-rpm";
 import { VitePlugin } from "@electron-forge/plugin-vite";
 import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { FuseV1Options, FuseVersion } from "@electron/fuses";
+import path from "path";
 
 // Based on https://github.com/electron/forge/blob/6b2d547a7216c30fde1e1fddd1118eee5d872945/packages/plugin/vite/src/VitePlugin.ts#L124
 // Add ignore function to prevent build issues
@@ -43,6 +44,9 @@ const config: ForgeConfig = {
       },
     ],
     icon: "./assets/icon/logo",
+    extraResource: [
+      path.resolve(__dirname, "node_modules/better-sqlite3/build/Release"),
+    ],
 
     // Code signing configuration
     osxSign: isEndToEndTestBuild

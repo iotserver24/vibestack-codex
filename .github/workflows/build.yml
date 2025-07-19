@@ -18,9 +18,12 @@ jobs:
       - name: Install & Build (Linux)
         run: |
           npm ci
+          npm run postinstall
           npm run make
         env:
           NODE_ENV: "production"
+      - name: Test SQLite in Electron
+        run: npm run test-sqlite
 
       - name: Debug Build Output (Linux)
         run: |
@@ -48,9 +51,12 @@ jobs:
       - name: Install & Build (macOS)
         run: |
           npm ci
+          npm run postinstall
           npm run make
         env:
           NODE_ENV: "production"
+      - name: Test SQLite in Electron
+        run: npm run test-sqlite
       - name: Debug Build Output (macOS)
         run: |
           echo "=== Build Output Structure ==="
@@ -77,9 +83,12 @@ jobs:
       - name: Install & Build (Windows)
         run: |
           npm ci
+          npm run postinstall
           npm run make
         env:
           NODE_ENV: "production"
+      - name: Test SQLite in Electron
+        run: npm run test-sqlite
       - name: Debug Build Output (Windows)
         run: |
           echo "=== Build Output Structure ==="
