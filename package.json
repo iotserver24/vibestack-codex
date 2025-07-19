@@ -1,8 +1,8 @@
 {
-  "name": "vibestack-codex",
-  "productName": "VibeStack-Codex",
+  "name": "codex",
+  "productName": "CodeX",
   "version": "1.0.3",
-  "description": "VibeStacks - Modern collaborative AI platform",
+  "description": "CodeX - Modern collaborative AI platform",
   "main": ".vite/build/main.js",
   "repository": {
     "type": "git",
