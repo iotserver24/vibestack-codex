@@ -35,7 +35,7 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "extract-codebase": "ts-node scripts/extract-codebase.ts",
-    "prepare": "husky install",
+    "prepare": "if [ -z \"$CI\" ]; then husky install; fi",
     "pre:e2e": "cross-env E2E_TEST_BUILD=true npm run package",
     "e2e": "playwright test"
   },
