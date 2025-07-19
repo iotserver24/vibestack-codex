@@ -82,10 +82,10 @@ try {
 try {
   const dyadShimPath = path.join(__dirname, "dyad-shim.js");
   dyadShimContent = fs.readFileSync(dyadShimPath, "utf-8");
-  parentPort?.postMessage("[proxy-worker] dyad-shim.js loaded.");
+  parentPort?.postMessage("[proxy-worker] CodeX-shim.js loaded.");
 } catch (error) {
   parentPort?.postMessage(
-    `[proxy-worker] Failed to read dyad-shim.js: ${error.message}`,
+    `[proxy-worker] Failed to read CodeX-shim.js: ${error.message}`,
   );
 }
 
@@ -99,11 +99,11 @@ try {
     "utf-8",
   );
   parentPort?.postMessage(
-    "[proxy-worker] dyad-component-selector-client.js loaded.",
+    "[proxy-worker] CodeX-component-selector-client.js loaded.",
   );
 } catch (error) {
   parentPort?.postMessage(
-    `[proxy-worker] Failed to read dyad-component-selector-client.js: ${error.message}`,
+    `[proxy-worker] Failed to read CodeX-component-selector-client.js: ${error.message}`,
   );
 }
 
@@ -135,7 +135,7 @@ function injectHTML(buf) {
       scripts.push(`<script>${dyadShimContent}</script>`);
     } else {
       scripts.push(
-        '<script>console.warn("[proxy-worker] dyad shim was not injected.");</script>',
+        '<script>console.warn("[proxy-worker] CodeX shim was not injected.");</script>',
       );
     }
   }
@@ -143,7 +143,7 @@ function injectHTML(buf) {
     scripts.push(`<script>${dyadComponentSelectorClientContent}</script>`);
   } else {
     scripts.push(
-      '<script>console.warn("[proxy-worker] dyad component selector client was not injected.");</script>',
+      '<script>console.warn("[proxy-worker] CodeX component selector client was not injected.");</script>',
     );
   }
   const allScripts = scripts.join("\n");

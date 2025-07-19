@@ -103,9 +103,10 @@ export function ProviderSettingsGrid() {
       <h2 className="text-lg font-medium mb-6">AI Providers</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {providers
-          ?.filter((p) => p.type !== "local")
+          ?.filter((p) => p.type !== "local" && p.id !== "auto") // hide Smart Auto from AI Providers grid
           .map((provider: LanguageModelProvider) => {
             const isCustom = provider.type === "custom";
+            const isPollination = provider.id === "pollination";
 
             return (
               <Card
@@ -118,7 +119,7 @@ export function ProviderSettingsGrid() {
                 >
                   <CardTitle className="text-lg font-medium flex items-center justify-between">
                     {provider.name}
-                    {isProviderSetup(provider.id) ? (
+                    {(isPollination || isProviderSetup(provider.id)) ? (
                       <span className="ml-3 text-sm font-medium text-green-500 bg-green-50 dark:bg-green-900/30 border border-green-500/50 dark:border-green-500/50 px-2 py-1 rounded-full">
                         Ready
                       </span>
@@ -129,7 +130,13 @@ export function ProviderSettingsGrid() {
                     )}
                   </CardTitle>
                   <CardDescription>
-                    {provider.hasFreeTier && (
+                    {isPollination && (
+                      <span className="text-blue-600 mt-2 dark:text-blue-400 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full inline-flex items-center">
+                        <GiftIcon className="w-4 h-4 mr-1" />
+                        Free
+                      </span>
+                    )}
+                    {!isPollination && provider.hasFreeTier && (
                       <span className="text-blue-600 mt-2 dark:text-blue-400 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full inline-flex items-center">
                         <GiftIcon className="w-4 h-4 mr-1" />
                         Free tier available

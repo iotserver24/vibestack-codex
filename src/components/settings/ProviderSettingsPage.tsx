@@ -54,7 +54,7 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
     ? "Dyad"
     : (providerData?.name ?? "Unknown Provider");
   const providerWebsiteUrl = isDyad
-    ? "https://academy.dyad.sh/settings"
+    ? "https://codex.anishkumar.tech/docs/guides/ai-models/pro-modes#smart-context"
     : providerData?.websiteUrl;
   const hasFreeTier = isDyad ? false : providerData?.hasFreeTier;
   const envVarName = isDyad ? undefined : providerData?.envVarName;
@@ -136,7 +136,7 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
         enableDyadPro: enabled,
       });
     } catch (error: any) {
-      showError(`Error toggling Dyad Pro: ${error}`);
+      showError(`Error toggling CodeX Pro: ${error}`);
     } finally {
       setIsSaving(false);
     }
@@ -267,15 +267,15 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
         {isDyad && !settingsLoading && (
           <div className="mt-6 flex items-center justify-between p-4 bg-(--background-lightest) rounded-lg border">
             <div>
-              <h3 className="font-medium">Enable Dyad Pro</h3>
+              <h3 className="font-medium">Dyad Pro</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Toggle to enable Dyad Pro
+                Dyad Pro is always enabled in this build.
               </p>
             </div>
             <Switch
-              checked={settings?.enableDyadPro}
-              onCheckedChange={handleToggleDyadPro}
-              disabled={isSaving}
+              checked={true}
+              onCheckedChange={() => {}}
+              disabled={true}
             />
           </div>
         )}

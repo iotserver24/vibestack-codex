@@ -145,14 +145,125 @@ export const MODEL_OPTIONS: Record<string, ModelOption[]> = {
   auto: [
     {
       name: "auto",
-      displayName: "Auto",
-      description: "Automatically selects the best model",
-      tag: "Default",
-      // These are below Gemini 2.5 Pro & Flash limits
-      // which are the ones defaulted to for both regular auto
-      // and smart auto.
+      displayName: "Smart Auto",
+      description: "Automatically selects the best model for your task",
+      tag: "Smart Auto",
       maxOutputTokens: 32_000,
       contextWindow: 1_000_000,
+    },
+  ],
+  pollination: [
+    {
+      name: "bidara",
+      displayName: "BIDARA - Biomimetic Designer by NASA",
+      description:
+        "BIDARA - Biomimetic Designer and Research Assistant by NASA",
+      tag: "Vision",
+    },
+    {
+      name: "deepseek",
+      displayName: "DeepSeek-V3",
+      description: "DeepSeek-V3",
+    },
+    {
+      name: "deepseek-reasoning",
+      displayName: "DeepSeek R1-0528",
+      description: "DeepSeek R1-0528 reasoning model",
+      tag: "Reasoning",
+    },
+    {
+      name: "elixposearch",
+      displayName: "ElixpoSearch",
+      description: "ElixpoSearch - Custom search-enhanced AI model",
+    },
+    {
+      name: "evil",
+      displayName: "Evil",
+      description: "Uncensored model",
+      tag: "Vision",
+    },
+    {
+      name: "grok",
+      displayName: "xAi Grok-3 Mini",
+      description: "xAi Grok-3 Mini model with tools support",
+      tag: "Tools",
+    },
+    {
+      name: "hypnosis-tracy",
+      displayName: "Hypnosis Tracy 7B",
+      description: "Hypnosis Tracy 7B with audio support",
+      tag: "Audio",
+    },
+    {
+      name: "llamascout",
+      displayName: "Llama 4 Scout 17B",
+      description: "Llama 4 Scout 17B model",
+    },
+    {
+      name: "midijourney",
+      displayName: "Midijourney",
+      description: "Midijourney with tools support",
+      tag: "Tools",
+    },
+    {
+      name: "mirexa",
+      displayName: "Mirexa AI Companion",
+      description: "Mirexa AI Companion (GPT-4.1) with vision",
+      tag: "Vision",
+    },
+    {
+      name: "mistral",
+      displayName: "Mistral Small 3.1 24B",
+      description: "Mistral Small 3.1 24B with vision and tools",
+      tag: "Vision",
+    },
+    {
+      name: "openai",
+      displayName: "GPT-4.1-mini",
+      description: "GPT-4.1-mini with vision and tools",
+      tag: "Vision",
+    },
+    {
+      name: "openai-audio",
+      displayName: "GPT-4o-audio-preview",
+      description: "GPT-4o-audio-preview with audio support",
+      tag: "Audio",
+    },
+    {
+      name: "openai-fast",
+      displayName: "GPT-4.1-nano",
+      description: "Fast GPT-4.1-nano with vision",
+      tag: "Vision",
+    },
+    {
+      name: "openai-large",
+      displayName: "GPT-4.1",
+      description: "GPT-4.1 with vision and tools",
+      tag: "Vision",
+    },
+    {
+      name: "openai-reasoning",
+      displayName: "OpenAI O3",
+      description: "OpenAI O3 reasoning model",
+      tag: "Reasoning",
+    },
+    {
+      name: "phi",
+      displayName: "Phi-4 Instruct",
+      description: "Phi-4 Instruct with vision and audio",
+      tag: "Vision",
+    },
+    {
+      name: "qwen-coder",
+      displayName: "Qwen 2.5 Coder 32B",
+      description: "Qwen 2.5 Coder 32B with tools support",
+      tag: "Tools",
+    },
+    {
+      name: "rtist",
+      displayName: "Rtist",
+      description: "Rtist with tools support",
+      tag: "Tools",
     },
   ],
 };
@@ -162,6 +273,7 @@ export const PROVIDER_TO_ENV_VAR: Record<string, string> = {
   anthropic: "ANTHROPIC_API_KEY",
   google: "GEMINI_API_KEY",
   openrouter: "OPENROUTER_API_KEY",
+  pollination: "POLLINATION_API_KEY",
 };
 
 export const CLOUD_PROVIDERS: Record<
@@ -197,10 +309,18 @@ export const CLOUD_PROVIDERS: Record<
     websiteUrl: "https://openrouter.ai/settings/keys",
     gatewayPrefix: "openrouter/",
   },
+  pollination: {
+    displayName: "Pollination AI",
+    hasFreeTier: false,
+    tag: "Free",
+    websiteUrl: "https://pollinations.ai/",
+    gatewayPrefix: "",
+  },
   auto: {
-    displayName: "Dyad",
-    websiteUrl: "https://academy.dyad.sh/settings",
-    gatewayPrefix: "dyad/",
+    displayName: "Smart Auto",
+    hasFreeTier: true,
+    websiteUrl: "",
+    gatewayPrefix: "",
   },
 };
 

@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Github } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
-import { showSuccess, showError } from "@/lib/toast";
+import { showError, showSuccess } from "@/lib/toast";
+import { Github } from "lucide-react";
+import { useState } from "react";
 
 export function GitHubIntegration() {
   const { settings, updateSettings } = useSettings();

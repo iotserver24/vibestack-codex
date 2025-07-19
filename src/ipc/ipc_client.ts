@@ -200,6 +200,13 @@ export class IpcClient {
     return this.ipcRenderer.invoke("get-app-env-vars", params);
   }
 
+  // Check for updates
+  public async checkForUpdates(): Promise<any> {
+    const res = await fetch("https://codex.anishkumar.tech/version.json");
+    if (!res.ok) throw new Error("Failed to fetch update info");
+    return res.json();
+  }
+
   public async setAppEnvVars(params: SetAppEnvVarsParams): Promise<void> {
     return this.ipcRenderer.invoke("set-app-env-vars", params);
   }
@@ -627,12 +634,14 @@ export class IpcClient {
     org: string,
     repo: string,
     appId: number,
+    isPrivate: boolean,
     branch?: string,
   ): Promise<void> {
     await this.ipcRenderer.invoke("github:create-repo", {
       org,
       repo,
       appId,
+      isPrivate,
       branch,
     });
   }

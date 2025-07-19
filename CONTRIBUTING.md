@@ -6,7 +6,7 @@ Before opening a pull request, please open an issue and discuss whether the chan
 
 ## More than code contributions
 
-Something that I really appreciate are all the non-code contributions, such as reporting bugs, writing feature requests and participating on [Dyad's sub-reddit](https://www.reddit.com/r/dyadbuilders).
+Something that I really appreciate are all the non-code contributions, such as reporting bugs, writing feature requests and participating.
 
 ## Development
 

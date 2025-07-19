@@ -97,8 +97,8 @@ const config: ForgeConfig = {
       name: "@electron-forge/publisher-github",
       config: {
         repository: {
-          owner: "dyad-sh",
-          name: "dyad",
+          owner: "iotserver24",
+          name: "codex",
         },
         draft: true,
         force: true,

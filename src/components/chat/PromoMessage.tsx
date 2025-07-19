@@ -56,18 +56,18 @@ export function Message({ spans }: MessageConfig) {
 export const TURBO_EDITS_PROMO_MESSAGE: MessageConfig = {
   spans: [
     { type: "text", content: "Tired of waiting on AI?" },
-    { type: "link", content: " Get Dyad Pro", url: "https://dyad.sh/pro#ai" },
-    { type: "text", content: " for faster edits with Turbo Edits." },
+    { type: "link", content: " same here", url: "https://anishkumar.tech" },
+    { type: "text", content: " just check my website as it builds." },
   ],
 };
 
 export const SMART_CONTEXT_PROMO_MESSAGE: MessageConfig = {
   spans: [
-    { type: "text", content: "Save up to 5x on AI costs with " },
+    { type: "text", content: "Save up to 5x ass on building fulllstack websites with " },
     {
       type: "link",
-      content: "Dyad Pro's Smart Context",
-      url: "https://dyad.sh/pro#ai",
+      content: "Me,dev of this app will do it for cheap price , (please dont ask me to do it for free or pay vv less, i need to eat)",
+      url: "https://anishkumar.tech",
     },
   ],
 };
@@ -90,8 +90,8 @@ export const REDDIT_TIP: MessageConfig = {
     },
     {
       type: "link",
-      content: "Dyad subreddit",
-      url: "https://www.reddit.com/r/dyadbuilders/",
+      content: "pornhub",
+      url: "https://pornhub.com",
     },
   ],
 };
@@ -110,7 +110,7 @@ export const UPLOAD_CHAT_TIP: MessageConfig = {
     {
       type: "text",
       content:
-        "Want to report a bad AI response? Upload the chat by clicking Help",
+        "Want to report a bad AI response? ask ai provider not me ",
     },
   ],
 };
@@ -120,11 +120,11 @@ export const BUILD_A_BIBLE_APP_TIP: MessageConfig = {
     {
       type: "link",
       content: "Watch",
-      url: "https://www.youtube.com/watch?v=a7OoruOkkeg&list=PL1xR2pfIiRlW7mgr9AS95OkFQBtvrSlO5",
+      url: "https://anishkumar.tech/docs",
     },
     {
       type: "text",
-      content: " the creator of Dyad build a Bible app step-by-step",
+      content: " my portfolio ",
     },
   ],
 };
@@ -137,8 +137,8 @@ export const DEBUGGING_TIPS_TIP: MessageConfig = {
     },
     {
       type: "link",
-      content: "debugging tips",
-      url: "https://www.dyad.sh/docs/guides/debugging",
+      content: "docs so that when u read it the time passes by and it will work",
+      url: "https://codex.anishkumar.tech/docs",
     },
   ],
 };
@@ -153,7 +153,7 @@ export const AI_RULES_TIP: MessageConfig = {
     {
       type: "link",
       content: "AI rules",
-      url: "https://www.dyad.sh/docs/guides/ai-rules",
+      url: "https://codex.anishkumar.tech/docs/guides/ai-rules",
     },
   ],
 };
@@ -177,7 +177,7 @@ export const ROADMAP_TIP: MessageConfig = {
     {
       type: "link",
       content: "roadmap",
-      url: "https://www.dyad.sh/docs/roadmap",
+      url: "https://codex.anishkumar.tech/docs/roadmap",
     },
   ],
 };
@@ -187,12 +187,12 @@ export const GITHUB_TIP: MessageConfig = {
   spans: [
     {
       type: "text",
-      content: "Like Dyad? Star it on ",
+      content: "Like codex ? Star it on ",
     },
     {
       type: "link",
       content: "GitHub",
-      url: "https://github.com/dyad-sh/dyad",
+      url: "https://github.com/iotserver24/codex.git",
     },
   ],
 };

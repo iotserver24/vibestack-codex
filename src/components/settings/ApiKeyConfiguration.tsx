@@ -69,6 +69,11 @@ export function ApiKeyConfiguration({
     defaultAccordionValue.push("env-key");
   }
 
+  const isPollination = provider === "pollination";
+  const defaultPollinationKey = "uNoesre5jXDzjhiY"; // Example default key, replace with your actual default
+  const showDelete = !isPollination;
+  const showKey = !isPollination;
+
   return (
     <Accordion
       type="multiple"
@@ -83,11 +88,12 @@ export function ApiKeyConfiguration({
           API Key from Settings
         </AccordionTrigger>
         <AccordionContent className="pt-4 ">
-          {isValidUserKey && (
+          {isValidUserKey && showKey && (
             <Alert variant="default" className="mb-4">
               <KeyRound className="h-4 w-4" />
               <AlertTitle className="flex justify-between items-center">
                 <span>Current Key (Settings)</span>
+                {showDelete && (
                 <Button
                   variant="destructive"
                   size="sm"
@@ -98,6 +104,7 @@ export function ApiKeyConfiguration({
                   <Trash2 className="h-4 w-4" />
                   {isSaving ? "Deleting..." : "Delete"}
                 </Button>
+                )}
               </AlertTitle>
               <AlertDescription>
                 <p className="font-mono text-sm">{userApiKey}</p>
@@ -106,6 +113,18 @@ export function ApiKeyConfiguration({
                     This key is currently active.
                   </p>
                 )}
+              </AlertDescription>
+            </Alert>
+          )}
+          {isPollination && (
+            <Alert variant="default" className="mb-4">
+              <KeyRound className="h-4 w-4" />
+              <AlertTitle>Default Key (Free)</AlertTitle>
+              <AlertDescription>
+                <p className="font-mono text-sm">************</p>
+                <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                  This key is always active unless you set your own.
+                </p>
               </AlertDescription>
             </Alert>
           )}
@@ -131,8 +150,7 @@ export function ApiKeyConfiguration({
             </div>
             {saveError && <p className="text-xs text-red-600">{saveError}</p>}
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Setting a key here will override the environment variable (if
-              set).
+              Setting a key here will override the default free key.
             </p>
           </div>
         </AccordionContent>

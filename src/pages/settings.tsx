@@ -5,7 +5,7 @@ import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { IpcClient } from "@/ipc/ipc_client";
 import { showSuccess, showError } from "@/lib/toast";
 import { AutoApproveSwitch } from "@/components/AutoApproveSwitch";
-import { TelemetrySwitch } from "@/components/TelemetrySwitch";
+// import { TelemetrySwitch } from "@/components/TelemetrySwitch";
 import { MaxChatTurnsSelector } from "@/components/MaxChatTurnsSelector";
 import { ThinkingBudgetSelector } from "@/components/ThinkingBudgetSelector";
 import { useSettings } from "@/hooks/useSettings";
@@ -76,7 +76,7 @@ export default function SettingsPage() {
             <ProviderSettingsGrid />
           </div>
 
-          <div className="space-y-6">
+          {/* <div className="space-y-6">
             <div
               id="telemetry"
               className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6"
@@ -98,7 +98,7 @@ export default function SettingsPage() {
                 </span>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Integrations Section */}
           <div

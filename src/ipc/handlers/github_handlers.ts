@@ -1,41 +1,25 @@
-import { ipcMain, BrowserWindow, IpcMainInvokeEvent } from "electron";
-import fetch from "node-fetch"; // Use node-fetch for making HTTP requests in main process
-import { writeSettings, readSettings } from "../../main/settings";
+import { BrowserWindow, type IpcMainInvokeEvent, ipcMain } from "electron";
 import git from "isomorphic-git";
 import http from "isomorphic-git/http/node";
-import * as schema from "../../db/schema";
+import fetch from "node-fetch"; // Use node-fetch for making HTTP requests in main process
+import { updateAppGithubRepo } from "../../db/index";
+import { readSettings, writeSettings } from "../../main/settings";
+
 import fs from "node:fs";
-import { getDyadAppPath } from "../../paths/paths";
+import { eq } from "drizzle-orm";
+import log from "electron-log";
 import { db } from "../../db";
 import { apps } from "../../db/schema";
-import { eq } from "drizzle-orm";
-import { GithubUser } from "../../lib/schemas";
-import log from "electron-log";
-import { IS_TEST_BUILD } from "../utils/test_utils";
+import type { GithubUser } from "../../lib/schemas";
+import { getDyadAppPath } from "../../paths/paths";
 
 const logger = log.scope("github_handlers");
 
 // --- GitHub Device Flow Constants ---
 // TODO: Fetch this securely, e.g., from environment variables or a config file
-const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID || "Ov23liWV2HdC0RBLecWx";
-
-// Use test server URLs when in test mode
-
-const TEST_SERVER_BASE = "http://localhost:3500";
-
-const GITHUB_DEVICE_CODE_URL = IS_TEST_BUILD
-  ? `${TEST_SERVER_BASE}/github/login/device/code`
-  : "https://github.com/login/device/code";
-const GITHUB_ACCESS_TOKEN_URL = IS_TEST_BUILD
-  ? `${TEST_SERVER_BASE}/github/login/oauth/access_token`
-  : "https://github.com/login/oauth/access_token";
-const GITHUB_API_BASE = IS_TEST_BUILD
-  ? `${TEST_SERVER_BASE}/github/api`
-  : "https://api.github.com";
-const GITHUB_GIT_BASE = IS_TEST_BUILD
-  ? `${TEST_SERVER_BASE}/github/git`
-  : "https://github.com";
-
+const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID || "Ov23liFNrMDyhpDuLqtu";
+const GITHUB_DEVICE_CODE_URL = "https://github.com/login/device/code";
+const GITHUB_ACCESS_TOKEN_URL = "https://github.com/login/oauth/access_token";
 const GITHUB_SCOPES = "repo,user,workflow"; // Define the scopes needed
 
 // --- State Management (Simple in-memory, consider alternatives for robustness) ---
@@ -64,7 +48,7 @@ export async function getGithubUser(): Promise<GithubUser | null> {
   try {
     const accessToken = settings.githubAccessToken?.value;
     if (!accessToken) return null;
-    const res = await fetch(`${GITHUB_API_BASE}/user/emails`, {
+    const res = await fetch("https://api.github.com/user/emails", {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     if (!res.ok) return null;
@@ -83,12 +67,6 @@ export async function getGithubUser(): Promise<GithubUser | null> {
     return null;
   }
 }
-
-// function event.sender.send(channel: string, data: any) {
-//   if (currentFlowState?.window && !currentFlowState.window.isDestroyed()) {
-//     currentFlowState.window.webContents.send(channel, data);
-//   }
-// }
 
 async function pollForAccessToken(event: IpcMainInvokeEvent) {
   if (!currentFlowState || !currentFlowState.isPolling) {
@@ -311,7 +289,7 @@ async function handleListGithubRepos(): Promise<
 
     // Fetch user's repositories
     const response = await fetch(
-      `${GITHUB_API_BASE}/user/repos?per_page=100&sort=updated`,
+      "https://api.github.com/user/repos?per_page=100&sort=updated",
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -354,7 +332,7 @@ async function handleGetRepoBranches(
 
     // Fetch repository branches
     const response = await fetch(
-      `${GITHUB_API_BASE}/repos/${owner}/${repo}/branches`,
+      `https://api.github.com/repos/${owner}/${repo}/branches`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -396,13 +374,13 @@ async function handleIsRepoAvailable(
     // If org is empty, use the authenticated user
     const owner =
       org ||
-      (await fetch(`${GITHUB_API_BASE}/user`, {
+      (await fetch(`https://api.github.com/user`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
         .then((r) => r.json())
         .then((u) => u.login));
     // Check if repo exists
-    const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}`;
+    const url = `https://api.github.com/repos/${owner}/${repo}`;
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
@@ -426,8 +404,9 @@ async function handleCreateRepo(
     org,
     repo,
     appId,
+    isPrivate = true,
     branch,
-  }: { org: string; repo: string; appId: number; branch?: string },
+  }: { org: string; repo: string; appId: number; isPrivate?: boolean; branch?: string },
 ): Promise<void> {
   // Get access token from settings
   const settings = readSettings();
@@ -438,7 +417,7 @@ async function handleCreateRepo(
   // If org is empty, create for the authenticated user
   let owner = org;
   if (!owner) {
-    const userRes = await fetch(`${GITHUB_API_BASE}/user`, {
+    const userRes = await fetch(`https://api.github.com/user`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     const user = await userRes.json();
@@ -446,8 +425,8 @@ async function handleCreateRepo(
   }
   // Create repo
   const createUrl = org
-    ? `${GITHUB_API_BASE}/orgs/${owner}/repos`
-    : `${GITHUB_API_BASE}/user/repos`;
+    ? `https://api.github.com/orgs/${owner}/repos`
+    : `https://api.github.com/user/repos`;
   const res = await fetch(createUrl, {
     method: "POST",
     headers: {
@@ -457,7 +436,7 @@ async function handleCreateRepo(
     },
     body: JSON.stringify({
       name: repo,
-      private: true,
+      private: isPrivate,
     }),
   });
   if (!res.ok) {
@@ -524,7 +503,7 @@ async function handleConnectToExistingRepo(
 
     // Verify the repository exists and user has access
     const repoResponse = await fetch(
-      `${GITHUB_API_BASE}/repos/${owner}/${repo}`,
+      `https://api.github.com/repos/${owner}/${repo}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -569,9 +548,7 @@ async function handlePushToGithub(
     const branch = app.githubBranch || "main";
 
     // Set up remote URL with token
-    const remoteUrl = IS_TEST_BUILD
-      ? `${GITHUB_GIT_BASE}/${app.githubOrg}/${app.githubRepo}.git`
-      : `https://${accessToken}:x-oauth-basic@github.com/${app.githubOrg}/${app.githubRepo}.git`;
+    const remoteUrl = `https://${accessToken}:x-oauth-basic@github.com/${app.githubOrg}/${app.githubRepo}.git`;
     // Set or update remote URL using git config
     await git.setConfig({
       fs,
@@ -664,11 +641,11 @@ export async function updateAppGithubRepo({
   branch?: string;
 }): Promise<void> {
   await db
-    .update(schema.apps)
+    .update(apps)
     .set({
       githubOrg: org,
       githubRepo: repo,
       githubBranch: branch || "main",
     })
-    .where(eq(schema.apps.id, appId));
+    .where(eq(apps.id, appId));
 }

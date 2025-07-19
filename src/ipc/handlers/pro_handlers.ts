@@ -25,11 +25,11 @@ export function registerProHandlers() {
     const apiKey = settings.providerSettings?.auto?.apiKey?.value;
 
     if (!apiKey) {
-      logger.error("LLM Gateway API key (Dyad Pro) is not configured.");
+      logger.error("LLM Gateway API key (CodeX Pro) is not configured.");
       return null;
     }
 
-    const url = "https://llm-gateway.dyad.sh/user/info";
+    const url = "https://llm-gateway.codex.anishkumar.tech/user/info";
     const headers = {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,

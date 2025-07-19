@@ -15,6 +15,10 @@ import {
   CheckIcon,
   XIcon,
   FileIcon,
+  Gift,
+  RefreshCw,
+  ExternalLink,
+  Info,
 } from "lucide-react";
 import { IpcClient } from "@/ipc/ipc_client";
 import { useState, useEffect } from "react";
@@ -35,6 +39,13 @@ export function HelpDialog({ isOpen, onClose }: HelpDialogProps) {
   const [chatLogsData, setChatLogsData] = useState<ChatLogsData | null>(null);
   const [uploadComplete, setUploadComplete] = useState(false);
   const [sessionId, setSessionId] = useState("");
+  const [updateInfo, setUpdateInfo] = useState<null | {
+    version: string;
+    releaseNotes: string;
+    downloadUrl: string;
+  }>(null);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [appVersion, setAppVersion] = useState<string | null>(null);
   const selectedChatId = useAtomValue(selectedChatIdAtom);
 
   // Function to reset all dialog state
@@ -53,6 +64,11 @@ export function HelpDialog({ isOpen, onClose }: HelpDialogProps) {
       resetDialogState();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    // Fetch app version on mount
+    IpcClient.getInstance().getAppVersion?.().then(setAppVersion);
+  }, []);
 
   // Wrap the original onClose to also reset state
   const handleClose = () => {
@@ -98,7 +114,7 @@ ${debugInfo.logs.slice(-3_500) || "No logs available"}
       // Create the GitHub issue URL with the pre-filled body
       const encodedBody = encodeURIComponent(issueBody);
       const encodedTitle = encodeURIComponent("[bug] <add title>");
-      const githubIssueUrl = `https://github.com/dyad-sh/dyad/issues/new?title=${encodedTitle}&labels=bug,filed-from-app&body=${encodedBody}`;
+      const githubIssueUrl = `https://github.com/iotserver24/codex/issues/new?title=${encodedTitle}&labels=bug,filed-from-app&body=${encodedBody}`;
 
       // Open the pre-filled GitHub issue page
       IpcClient.getInstance().openExternalUrl(githubIssueUrl);
@@ -106,7 +122,7 @@ ${debugInfo.logs.slice(-3_500) || "No logs available"}
       console.error("Failed to prepare bug report:", error);
       // Fallback to opening the regular GitHub issue page
       IpcClient.getInstance().openExternalUrl(
-        "https://github.com/dyad-sh/dyad/issues/new",
+        "https://github.com/iotserver24/codex/issues/new",
       );
     } finally {
       setIsLoading(false);
@@ -152,7 +168,7 @@ ${debugInfo.logs.slice(-3_500) || "No logs available"}
 
       // Get signed URL
       const response = await fetch(
-        "https://upload-logs.dyad.sh/generate-upload-url",
+        "https://upload-logs.codex.anishkumar.tech/generate-upload-url",
         {
           method: "POST",
           headers: {
@@ -214,10 +230,56 @@ Session ID: ${sessionId}
 
     const encodedBody = encodeURIComponent(issueBody);
     const encodedTitle = encodeURIComponent("[session report] <add title>");
-    const githubIssueUrl = `https://github.com/dyad-sh/dyad/issues/new?title=${encodedTitle}&labels=support&body=${encodedBody}`;
+    const githubIssueUrl = `https://github.com/iotserver24/codex/issues/new?title=${encodedTitle}&labels=support&body=${encodedBody}`;
 
     IpcClient.getInstance().openExternalUrl(githubIssueUrl);
     handleClose();
+  };
+
+  const handleDonate = () => {
+    IpcClient.getInstance().openExternalUrl(
+      "https://codex.anishkumar.tech/docs/support#-one-time-donations",
+    );
+  };
+
+  const handleCheckForUpdates = async () => {
+    try {
+      const data = await IpcClient.getInstance().checkForUpdates();
+      if (!appVersion) return;
+      const isNewer = (a: string, b: string) => {
+        const pa = a.split(".").map(Number);
+        const pb = b.split(".").map(Number);
+        for (let i = 0; i < 3; i++) {
+          if ((pa[i] || 0) < (pb[i] || 0)) return true;
+          if ((pa[i] || 0) > (pb[i] || 0)) return false;
+        }
+        return false;
+      };
+      if (isNewer(appVersion, data.version)) {
+        setUpdateInfo({
+          version: data.version,
+          releaseNotes: data.releaseNotes,
+          downloadUrl: data.downloadUrl,
+        });
+        setShowUpdateModal(true);
+      } else {
+        showError("You are using the latest version.");
+      }
+    } catch (e: any) {
+      showError(e?.message || "Failed to check for updates.");
+    }
+  };
+
+  const renderReleaseNotes = (notes: string | undefined) => {
+    if (!notes) return null;
+    return (
+      <div
+        className="max-h-40 overflow-y-auto whitespace-pre-line border rounded p-2 bg-muted text-sm mb-4"
+        style={{ fontFamily: "inherit" }}
+      >
+        {notes.replace(/\n/g, "\n")}
+      </div>
+    );
   };
 
   if (uploadComplete) {
@@ -358,60 +420,87 @@ Session ID: ${sessionId}
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Need help with Dyad?</DialogTitle>
+          <DialogTitle>Need help with CodeX?</DialogTitle>
         </DialogHeader>
-        <DialogDescription className="">
-          If you need help or want to report an issue, here are some options:
-        </DialogDescription>
-        <div className="flex flex-col space-y-4 w-full">
-          <div className="flex flex-col space-y-2">
+        <div className="space-y-6">
+          <div className="space-y-2">
             <Button
               variant="outline"
-              onClick={() => {
-                IpcClient.getInstance().openExternalUrl(
-                  "https://www.dyad.sh/docs",
-                );
-              }}
-              className="w-full py-6 bg-(--background-lightest)"
+              className="w-full flex items-center justify-start gap-2 text-lg py-4"
+              onClick={() => IpcClient.getInstance().openExternalUrl("https://codex.anishkumar.tech/docs")}
             >
-              <BookOpenIcon className="mr-2 h-5 w-5" /> Open Docs
+              <BookOpenIcon className="h-5 w-5" />
+              Open Docs
             </Button>
-            <p className="text-sm text-muted-foreground px-2">
+            <div className="text-sm text-muted-foreground">
               Get help with common questions and issues.
-            </p>
+            </div>
           </div>
-
-          <div className="flex flex-col space-y-2">
+          <div className="space-y-2">
             <Button
               variant="outline"
+              className="w-full flex items-center justify-start gap-2 text-lg py-4"
               onClick={handleReportBug}
               disabled={isLoading}
-              className="w-full py-6 bg-(--background-lightest)"
             >
-              <BugIcon className="mr-2 h-5 w-5" />{" "}
-              {isLoading ? "Preparing Report..." : "Report a Bug"}
+              <BugIcon className="h-5 w-5" />
+              Report a Bug
             </Button>
-            <p className="text-sm text-muted-foreground px-2">
-              We'll auto-fill your report with system info and logs. You can
-              review it for any sensitive info before submitting.
-            </p>
-          </div>
-          <div className="flex flex-col space-y-2">
-            <Button
-              variant="outline"
-              onClick={handleUploadChatSession}
-              disabled={isUploading || !selectedChatId}
-              className="w-full py-6 bg-(--background-lightest)"
-            >
-              <UploadIcon className="mr-2 h-5 w-5" />{" "}
-              {isUploading ? "Preparing Upload..." : "Upload Chat Session"}
-            </Button>
-            <p className="text-sm text-muted-foreground px-2">
-              Share chat logs and code for troubleshooting. Data is used only to
-              resolve your issue and auto-deleted after a limited time.
-            </p>
+            <div className="text-sm text-muted-foreground">
+              We'll auto-fill your report with system info and logs. You can review it for any sensitive info before submitting.
+            </div>
           </div>
         </div>
+        <div className="flex flex-col gap-2 mt-8">
+          <Button
+            variant="outline"
+            className="w-full flex items-center justify-start gap-2 text-lg py-3"
+            onClick={handleDonate}
+          >
+            <Gift className="w-5 h-5" /> Donate
+            <ExternalLink className="w-4 h-4 ml-1 opacity-60" />
+          </Button>
+            <Button
+              variant="outline"
+            className="w-full flex items-center justify-start gap-2 text-lg py-3"
+            onClick={handleCheckForUpdates}
+            >
+            <RefreshCw className="w-5 h-5" /> Check for Updates
+            </Button>
+        </div>
+        {/* Update Modal */}
+        <Dialog open={showUpdateModal} onOpenChange={setShowUpdateModal}>
+          <DialogContent>
+            <div className="flex items-center gap-3 mb-2">
+              <Info className="w-6 h-6 text-blue-500" />
+              <DialogTitle>Update Available</DialogTitle>
+            </div>
+            <DialogDescription>
+              <div className="mb-2">
+                A new version (<b>{updateInfo?.version}</b>) is available!
+              </div>
+              <div className="font-semibold mb-1">Release Notes:</div>
+              {renderReleaseNotes(updateInfo?.releaseNotes)}
+            </DialogDescription>
+            <DialogFooter>
+              <Button
+                variant="default"
+                onClick={() => {
+                  if (updateInfo?.downloadUrl) {
+                    IpcClient.getInstance().openExternalUrl(
+                      updateInfo.downloadUrl,
+                    );
+                  }
+                }}
+              >
+                Download Update
+              </Button>
+              <Button variant="outline" onClick={() => setShowUpdateModal(false)}>
+                Remind Me Later
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </DialogContent>
     </Dialog>
   );

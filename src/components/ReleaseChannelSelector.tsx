@@ -27,16 +27,16 @@ export function ReleaseChannelSelector() {
         action: {
           label: "Download Stable",
           onClick: () => {
-            IpcClient.getInstance().openExternalUrl("https://dyad.sh/download");
+            IpcClient.getInstance().openExternalUrl("https://codex.anishkumar.tech/download");
           },
         },
       });
     } else {
       toast("Using Beta release channel", {
         description:
-          "You will need to restart Dyad for your settings to take effect.",
+          "You will need to restart CodeX for your settings to take effect.",
         action: {
-          label: "Restart Dyad",
+          label: "Restart CodeX",
           onClick: () => {
             IpcClient.getInstance().restartDyad();
           },

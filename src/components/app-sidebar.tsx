@@ -1,9 +1,11 @@
-import { Home, Inbox, Settings, HelpCircle, Store } from "lucide-react";
+import { Home, Inbox, Settings, HelpCircle, Store, Gift, ExternalLink, RefreshCw, Info } from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useSidebar } from "@/components/ui/sidebar"; // import useSidebar hook
 import { useEffect, useState, useRef } from "react";
 import { useAtom } from "jotai";
 import { dropdownOpenAtom } from "@/atoms/uiAtoms";
+import { showError } from "@/lib/toast";
+import { toast } from "@/lib/toast";
 
 import {
   Sidebar,
@@ -21,6 +23,8 @@ import { ChatList } from "./ChatList";
 import { AppList } from "./AppList";
 import { HelpDialog } from "./HelpDialog"; // Import the new dialog
 import { SettingsList } from "./SettingsList";
+import { IpcClient } from "@/ipc/ipc_client";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 // Menu items.
 const items = [
@@ -60,6 +64,89 @@ export function AppSidebar() {
   const expandedByHover = useRef(false);
   const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false); // State for dialog
   const [isDropdownOpen] = useAtom(dropdownOpenAtom);
+  const [updateInfo, setUpdateInfo] = useState<null | {
+    version: string;
+    releaseNotes: string;
+    downloadUrl: string;
+  }>(null);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [appVersion, setAppVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    IpcClient.getInstance().getAppVersion?.().then(setAppVersion);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await IpcClient.getInstance().checkForUpdates();
+        if (!appVersion) return;
+        const isNewer = (a: string, b: string) => {
+          const pa = a.split(".").map(Number);
+          const pb = b.split(".").map(Number);
+          for (let i = 0; i < 3; i++) {
+            if ((pa[i] || 0) < (pb[i] || 0)) return true;
+            if ((pa[i] || 0) > (pb[i] || 0)) return false;
+          }
+          return false;
+        };
+        if (isNewer(appVersion, data.version)) {
+          setUpdateInfo({
+            version: data.version,
+            releaseNotes: data.releaseNotes,
+            downloadUrl: data.downloadUrl,
+          });
+          setShowUpdateModal(true);
+        }
+      } catch {
+        // Silent fail: do nothing on error
+      }
+    })();
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appVersion]);
+
+  const handleCheckForUpdates = async () => {
+    try {
+      const data = await IpcClient.getInstance().checkForUpdates();
+      if (!appVersion) return;
+      const isNewer = (a: string, b: string) => {
+        const pa = a.split(".").map(Number);
+        const pb = b.split(".").map(Number);
+        for (let i = 0; i < 3; i++) {
+          if ((pa[i] || 0) < (pb[i] || 0)) return true;
+          if ((pa[i] || 0) > (pb[i] || 0)) return false;
+        }
+        return false;
+      };
+      if (isNewer(appVersion, data.version)) {
+        setUpdateInfo({
+          version: data.version,
+          releaseNotes: data.releaseNotes,
+          downloadUrl: data.downloadUrl,
+        });
+        setShowUpdateModal(true);
+      } else {
+        toast.success?.("You are using the latest version.") || toast("You are using the latest version.");
+      }
+    } catch (e: any) {
+      showError(e?.message || "Failed to check for updates.");
+    }
+  };
+
+  const renderReleaseNotes = (notes: string | undefined) => {
+    if (!notes) return null;
+    return (
+      <div
+        className="max-h-40 overflow-y-auto whitespace-pre-line border rounded p-2 bg-muted text-sm mb-4"
+        style={{ fontFamily: "inherit" }}
+      >
+        {notes.split(/\\n|\n/).map((line, idx) => (
+          <div key={idx}>{line}</div>
+        ))}
+      </div>
+    );
+  };
 
   useEffect(() => {
     if (hoverState.startsWith("start-hover") && state === "collapsed") {
@@ -149,6 +236,55 @@ export function AppSidebar() {
             />
           </SidebarMenuItem>
         </SidebarMenu>
+        <button
+          className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-sidebar-accent text-sm mt-2"
+          onClick={() => {
+            IpcClient.getInstance().openExternalUrl(
+              "https://codex.anishkumar.tech/docs/support#-one-time-donations"
+            );
+          }}
+        >
+          <Gift className="w-4 h-4" /> Donate
+          <ExternalLink className="w-3 h-3 ml-1 opacity-60" />
+        </button>
+        <button
+          className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-sidebar-accent text-sm mt-2"
+          onClick={handleCheckForUpdates}
+        >
+          <RefreshCw className="w-4 h-4" /> Check for Updates
+        </button>
+        {/* Update Modal */}
+        <Dialog open={showUpdateModal} onOpenChange={setShowUpdateModal}>
+          <DialogContent>
+            <div className="flex items-center gap-3 mb-2">
+              <Info className="w-6 h-6 text-blue-500" />
+              <h2 className="text-lg font-semibold">Update Available</h2>
+            </div>
+            <div className="mb-2">
+              A new version (<b>{updateInfo?.version}</b>) is available!
+            </div>
+            <div className="font-semibold mb-1">Release Notes:</div>
+            {renderReleaseNotes(updateInfo?.releaseNotes)}
+            <div className="flex gap-2 mt-4">
+              <button
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                onClick={() => {
+                  if (updateInfo?.downloadUrl) {
+                    IpcClient.getInstance().openExternalUrl(updateInfo.downloadUrl);
+                  }
+                }}
+              >
+                Download Update
+              </button>
+              <button
+                className="px-4 py-2 border rounded hover:bg-muted"
+                onClick={() => setShowUpdateModal(false)}
+              >
+                Remind Me Later
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </SidebarFooter>
 
       <SidebarRail />
@@ -167,7 +303,7 @@ function AppIcons({
   return (
     // When collapsed: only show the main menu
     <SidebarGroup className="pr-0">
-      {/* <SidebarGroupLabel>Dyad</SidebarGroupLabel> */}
+      {/* <SidebarGroupLabel>CodeX</SidebarGroupLabel> */}
 
       <SidebarGroupContent>
         <SidebarMenu>

@@ -19,6 +19,7 @@ import { hasDyadProKey } from "@/lib/schemas";
 export function ProModeSelector() {
   const { settings, updateSettings } = useSettings();
 
+  // All toggles are always enabled
   const toggleLazyEdits = () => {
     updateSettings({
       enableProLazyEditsMode: !settings?.enableProLazyEditsMode,
@@ -37,8 +38,9 @@ export function ProModeSelector() {
     });
   };
 
-  const hasProKey = settings ? hasDyadProKey(settings) : false;
-  const proModeTogglable = hasProKey && Boolean(settings?.enableDyadPro);
+  // Always true for Pro
+  const hasProKey = true;
+  const proModeTogglable = true;
 
   return (
     <Popover>
@@ -55,38 +57,25 @@ export function ProModeSelector() {
             </Button>
           </PopoverTrigger>
         </TooltipTrigger>
-        <TooltipContent>Configure Dyad Pro settings</TooltipContent>
+        <TooltipContent>Configure CodeX Pro settings</TooltipContent>
       </Tooltip>
       <PopoverContent className="w-80 border-primary/20">
         <div className="space-y-4">
           <div className="space-y-1">
             <h4 className="font-medium flex items-center gap-1.5">
               <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-primary font-medium">Dyad Pro</span>
+              <span className="text-primary font-medium">CodeX Pro</span>
             </h4>
             <div className="h-px bg-gradient-to-r from-primary/50 via-primary/20 to-transparent" />
           </div>
-          {!hasProKey && (
-            <div className="text-sm text-center text-muted-foreground">
-              <a
-                className="inline-flex items-center justify-center gap-2 rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-primary/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                onClick={() => {
-                  IpcClient.getInstance().openExternalUrl(
-                    "https://dyad.sh/pro#ai",
-                  );
-                }}
-              >
-                Unlock Pro modes
-              </a>
-            </div>
-          )}
+          {/* Paywall UI removed */}
           <div className="flex flex-col gap-5">
             <SelectorRow
               id="pro-enabled"
-              label="Enable Dyad Pro"
-              description="Use Dyad Pro AI credits"
-              tooltip="Uses Dyad Pro AI credits for the main AI model and Pro modes."
-              isTogglable={hasProKey}
+              label="Enable CodeX Pro"
+              description="Use CodeX Pro AI credits"
+              tooltip="Uses CodeX Pro AI credits for the main AI model and Pro modes."
+              isTogglable={true}
               settingEnabled={Boolean(settings?.enableDyadPro)}
               toggle={toggleProEnabled}
             />
@@ -95,7 +84,7 @@ export function ProModeSelector() {
               label="Turbo Edits"
               description="Makes file edits faster and cheaper"
               tooltip="Uses a faster, cheaper model to generate full file updates."
-              isTogglable={proModeTogglable}
+              isTogglable={true}
               settingEnabled={Boolean(settings?.enableProLazyEditsMode)}
               toggle={toggleLazyEdits}
             />
@@ -104,7 +93,7 @@ export function ProModeSelector() {
               label="Smart Context"
               description="Optimizes your AI's code context"
               tooltip="Improve efficiency and save credits working on large codebases."
-              isTogglable={proModeTogglable}
+              isTogglable={true}
               settingEnabled={Boolean(settings?.enableProSmartFilesContextMode)}
               toggle={toggleSmartContext}
             />

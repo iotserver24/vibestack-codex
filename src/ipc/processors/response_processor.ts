@@ -377,17 +377,17 @@ export async function processFullResponseActions(
         try {
           commitHash = await gitCommit({
             path: appPath,
-            message: message + " + extra files edited outside of Dyad",
+            message: message + " + extra files edited outside of CodeX",
             amend: true,
           });
           logger.log(
-            `Amend commit with changes outside of dyad: ${uncommittedFiles.join(", ")}`,
+            `Amend commit with changes outside of CodeX: ${uncommittedFiles.join(", ")}`,
           );
         } catch (error) {
           // Just log, but don't throw an error because the user can still
-          // commit these changes outside of Dyad if needed.
+          // commit these changes outside of CodeX if needed.
           logger.error(
-            `Failed to commit changes outside of dyad: ${uncommittedFiles.join(
+            `Failed to commit changes outside of CodeX: ${uncommittedFiles.join(
               ", ",
             )}`,
           );

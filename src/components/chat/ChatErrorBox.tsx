@@ -12,43 +12,26 @@ export function ChatErrorBox({
   error: string;
   isDyadProEnabled: boolean;
 }) {
+  // Remove all upgrade/paywall prompts
   if (error.includes("doesn't have a free quota tier")) {
     return (
       <ChatErrorContainer onDismiss={onDismiss}>
         {error}
-        <span className="ml-1">
-          <ExternalLink href="https://dyad.sh/pro">
-            Access with Dyad Pro.
-          </ExternalLink>
-        </span>
       </ChatErrorContainer>
     );
   }
-
-  // Important, this needs to come after the "free quota tier" check
-  // because it also includes this URL in the error message
   if (error.includes("https://ai.google.dev/gemini-api/docs/rate-limits")) {
     return (
       <ChatErrorContainer onDismiss={onDismiss}>
         {error}
-        <span className="ml-1">
-          <ExternalLink href="https://dyad.sh/pro">
-            Upgrade to Dyad Pro.
-          </ExternalLink>
-        </span>
       </ChatErrorContainer>
     );
   }
-
   if (error.includes("LiteLLM Virtual Key expected")) {
     return (
       <ChatInfoContainer onDismiss={onDismiss}>
         <span>
-          Looks like you don't have a valid Dyad Pro key.{" "}
-          <ExternalLink href="https://dyad.sh/pro">
-            Upgrade to Dyad Pro
-          </ExternalLink>{" "}
-          today.
+          Looks like you don't have a valid key.
         </span>
       </ChatInfoContainer>
     );
@@ -57,11 +40,7 @@ export function ChatErrorBox({
     return (
       <ChatInfoContainer onDismiss={onDismiss}>
         <span>
-          You have used all of your Dyad AI credits this month.{" "}
-          <ExternalLink href="https://academy.dyad.sh/subscription">
-            Upgrade to Dyad Max
-          </ExternalLink>{" "}
-          and get more AI credits
+          You have used all of your AI credits this month.
         </span>
       </ChatInfoContainer>
     );

@@ -1,16 +1,10 @@
 import { useNavigate } from "@tanstack/react-router";
 import {
-  ChevronRight,
-  GiftIcon,
-  Sparkles,
   CheckCircle,
   AlertCircle,
   XCircle,
   Loader2,
-  Settings,
 } from "lucide-react";
-import { providerSettingsRoute } from "@/routes/settings/providers/$provider";
-import { settingsRoute } from "@/routes/settings";
 
 import { useState, useEffect, useCallback } from "react";
 import { IpcClient } from "@/ipc/ipc_client";
@@ -58,20 +52,7 @@ export function SetupBanner() {
     checkNode();
   }, [checkNode]);
 
-  const handleAiSetupClick = () => {
-    posthog.capture("setup-flow:ai-provider-setup:google:click");
-    navigate({
-      to: providerSettingsRoute.id,
-      params: { provider: "google" },
-    });
-  };
-
-  const handleOtherProvidersClick = () => {
-    posthog.capture("setup-flow:ai-provider-setup:other:click");
-    navigate({
-      to: settingsRoute.id,
-    });
-  };
+  // Removed AI setup handlers since Pollinations AI is available by default
 
   const handleNodeInstallClick = useCallback(async () => {
     posthog.capture("setup-flow:start-node-install-click");
@@ -94,9 +75,7 @@ export function SetupBanner() {
   if (!isNodeSetupComplete && nodeSystemInfo) {
     itemsNeedAction.push("node-setup");
   }
-  if (!isAnyProviderSetup() && !loading) {
-    itemsNeedAction.push("ai-setup");
-  }
+  // Removed AI setup step since Pollinations AI is available by default
 
   if (itemsNeedAction.length === 0) {
     return (
@@ -125,7 +104,7 @@ export function SetupBanner() {
   return (
     <>
       <p className="text-xl text-zinc-700 dark:text-zinc-300 p-4">
-        Follow these steps and you'll be ready to start building with Dyad...
+        Follow these steps and you'll be ready to start building with CodeX...
       </p>
       <div className={bannerClasses}>
         <Accordion
@@ -200,82 +179,7 @@ export function SetupBanner() {
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem
-            value="ai-setup"
-            className={cn(
-              isAnyProviderSetup()
-                ? "bg-green-50 dark:bg-green-900/30"
-                : "bg-yellow-50 dark:bg-yellow-900/30",
-            )}
-          >
-            <AccordionTrigger
-              className={cn(
-                "px-4 py-3 transition-colors w-full hover:no-underline",
-              )}
-            >
-              <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-3">
-                  {getStatusIcon(isAnyProviderSetup())}
-                  <span className="font-medium text-sm">
-                    2. Setup AI Model Access
-                  </span>
-                </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pt-2 pb-4 bg-white dark:bg-zinc-900 border-t border-inherit">
-              <p className="text-sm mb-3">
-                Connect your preferred AI provider to start generating code.
-              </p>
-              <div
-                className="p-3 bg-blue-50 dark:bg-blue-900/50 border border-blue-200 dark:border-blue-700 rounded-lg cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/70 transition-colors"
-                onClick={handleAiSetupClick}
-                role="button"
-                tabIndex={isNodeSetupComplete ? 0 : -1}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-blue-100 dark:bg-blue-800 p-1.5 rounded-full">
-                      <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-sm text-blue-800 dark:text-blue-300">
-                        Setup Google Gemini API Key
-                      </h4>
-                      <p className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1">
-                        <GiftIcon className="w-3 h-3" />
-                        Use Google Gemini for free
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                </div>
-              </div>
-
-              <div
-                className="mt-2 p-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-colors"
-                onClick={handleOtherProvidersClick}
-                role="button"
-                tabIndex={isNodeSetupComplete ? 0 : -1}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-gray-100 dark:bg-gray-700 p-1.5 rounded-full">
-                      <Settings className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-sm text-gray-800 dark:text-gray-300">
-                        Setup other AI providers
-                      </h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        OpenAI, Anthropic, OpenRouter and more
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+          {/* Removed AI setup step since Pollinations AI is available by default */}
         </Accordion>
       </div>
     </>
@@ -290,7 +194,7 @@ function NodeJsHelpCallout() {
         <a
           onClick={() => {
             IpcClient.getInstance().openExternalUrl(
-              "https://www.dyad.sh/docs/help/nodejs",
+              "https://codex.anishkumar.tech/docs/help/nodejs",
             );
           }}
           className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
@@ -343,7 +247,7 @@ function NodeInstallButton({
     case "finished-checking":
       return (
         <div className="mt-3 text-sm text-red-600 dark:text-red-400">
-          Node.js not detected. Closing and re-opening Dyad usually fixes this.
+          Node.js not detected. Closing and re-opening CodeX usually fixes this.
         </div>
       );
     default:

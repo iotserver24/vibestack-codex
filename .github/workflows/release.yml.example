@@ -22,7 +22,7 @@ jobs:
             # See https://github.com/dyad-sh/dyad/issues/96
             { name: "linux", image: "ubuntu-22.04" },
             { name: "macos-intel", image: "macos-13" },
-            { name: "macos", image: "macos-latest" },
+            { name: "macos", image: "macos-15" },
           ]
     runs-on: ${{ matrix.os.image }}
     steps:

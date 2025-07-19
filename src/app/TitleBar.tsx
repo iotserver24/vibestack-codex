@@ -72,8 +72,9 @@ export const TitleBar = () => {
     }
   };
 
-  const isDyadPro = !!settings?.providerSettings?.auto?.apiKey?.value;
-  const isDyadProEnabled = Boolean(settings?.enableDyadPro);
+  // Always treat as Pro
+  const isDyadPro = true;
+  const isDyadProEnabled = true;
 
   return (
     <>
@@ -92,7 +93,7 @@ export const TitleBar = () => {
         >
           {displayText}
         </Button>
-        {isDyadPro && <DyadProButton isDyadProEnabled={isDyadProEnabled} />}
+        {/* Pro button removed */}
 
         {/* Preview Header */}
         {location.pathname === "/chat" && (

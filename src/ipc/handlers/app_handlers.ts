@@ -145,7 +145,7 @@ async function executeAppLocalNode({
         onStarted: (proxyUrl) => {
           safeSend(event.sender, "app:output", {
             type: "stdout",
-            message: `[dyad-proxy-server]started=[${proxyUrl}] original=[${urlMatch[1]}]`,
+            message: `[CodeX-proxy-server]started=[${proxyUrl}] original=[${urlMatch[1]}]`,
             appId,
           });
         },
@@ -192,7 +192,7 @@ async function killProcessOnPort(port: number): Promise<void> {
 }
 
 export function registerAppHandlers() {
-  handle("restart-dyad", async () => {
+  handle("restart-CodeX", async () => {
     app.relaunch();
     app.quit();
   });
@@ -247,7 +247,7 @@ export function registerAppHandlers() {
       // Create initial commit
       const commitHash = await gitCommit({
         path: fullAppPath,
-        message: "Init Dyad app",
+        message: "Init CodeX app",
       });
 
       // Update chat with initial commit hash
@@ -319,7 +319,7 @@ export function registerAppHandlers() {
         // Create initial commit
         await gitCommit({
           path: newAppPath,
-          message: "Init Dyad app",
+          message: "Init CodeX app",
         });
       }
 

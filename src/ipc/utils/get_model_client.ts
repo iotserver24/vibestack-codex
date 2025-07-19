@@ -87,21 +87,21 @@ export async function getModelClient(
             settings,
           })
         : createOpenAICompatible({
-            name: "dyad-gateway",
+            name: "CodeX-gateway",
             apiKey: dyadApiKey,
-            baseURL: dyadGatewayUrl ?? "https://llm-gateway.dyad.sh/v1",
+            baseURL: dyadGatewayUrl ?? "https://llm-gateway.CodeX.anishkumar.tech/v1",
           });
 
       logger.info(
-        `\x1b[1;97;44m Using Dyad Pro API key for model: ${model.name}. engine_enabled=${isEngineEnabled} \x1b[0m`,
+        `\x1b[1;97;44m Using CodeX Pro API key for model: ${model.name}. engine_enabled=${isEngineEnabled} \x1b[0m`,
       );
       if (isEngineEnabled) {
         logger.info(
-          `\x1b[1;30;42m Using Dyad Pro engine: ${dyadEngineUrl ?? "<prod>"} \x1b[0m`,
+          `\x1b[1;30;42m Using CodeX Pro engine: ${CodeXEngineUrl ?? "<prod>"} \x1b[0m`,
         );
       } else {
         logger.info(
-          `\x1b[1;30;43m Using Dyad Pro gateway: ${dyadGatewayUrl ?? "<prod>"} \x1b[0m`,
+          `\x1b[1;30;43m Using CodeX Pro gateway: ${CodeXGatewayUrl ?? "<prod>"} \x1b[0m`,
         );
       }
       // Do not use free variant (for openrouter).
@@ -124,7 +124,7 @@ export async function getModelClient(
       };
     } else {
       logger.warn(
-        `Dyad Pro enabled, but provider ${model.provider} does not have a gateway prefix defined. Falling back to direct provider connection.`,
+        `CodeX Pro enabled, but provider ${model.provider} does not have a gateway prefix defined. Falling back to direct provider connection.`,
       );
       // Fall through to regular provider logic if gateway prefix is missing
     }
@@ -174,7 +174,8 @@ function getRegularModelClient(
     settings.providerSettings?.[model.provider]?.apiKey?.value ||
     (providerConfig.envVarName
       ? getEnvVar(providerConfig.envVarName)
-      : undefined);
+      : undefined) ||
+    (model.provider === "pollination" ? "uNoesre5jXDzjhiY" : undefined);
 
   const providerId = providerConfig.id;
   // Create client based on provider ID or type
@@ -211,6 +212,24 @@ function getRegularModelClient(
     }
     case "openrouter": {
       const provider = createOpenRouter({ apiKey });
+      return {
+        modelClient: {
+          model: provider(model.name),
+          builtinProviderId: providerId,
+        },
+        backupModelClients: [],
+      };
+    }
+    case "pollination": {
+      let userToken = settings.providerSettings?.[model.provider]?.apiKey?.value;
+      if (!userToken || userToken === "Not Set" || userToken === "Invalid Key" || userToken.trim() === "") {
+        userToken = "uNoesre5jXDzjhiY"; // Default free token
+      }
+      const provider = createOpenAICompatible({
+        name: "pollination",
+        baseURL: "https://text.pollinations.ai/openai/v1",
+        apiKey: userToken,
+      });
       return {
         modelClient: {
           model: provider(model.name),
