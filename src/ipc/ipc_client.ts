@@ -204,7 +204,25 @@ export class IpcClient {
   public async checkForUpdates(): Promise<any> {
     const res = await fetch("https://codex.anishkumar.tech/version.json");
     if (!res.ok) throw new Error("Failed to fetch update info");
-    return res.json();
+    const data = await res.json();
+
+    // Get current app version and release channel
+    const _currentVersion = await this.getAppVersion();
+    const settings = await this.getUserSettings();
+    const releaseChannel = settings?.releaseChannel || "stable";
+
+    // Return appropriate version info based on release channel
+    if (releaseChannel === "beta" && data.beta) {
+      return {
+        ...data.beta,
+        isBeta: true,
+      };
+    } else {
+      return {
+        ...data.stable,
+        isBeta: false,
+      };
+    }
   }
 
   public async setAppEnvVars(params: SetAppEnvVarsParams): Promise<void> {

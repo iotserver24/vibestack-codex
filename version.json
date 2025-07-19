@@ -1,0 +1,12 @@
+{
+  "stable": {
+    "version": "1.0.3",
+    "downloadUrl": "https://github.com/iotserver24/codex/releases/latest",
+    "releaseNotes": "Major update with Vercel integration, Smart Context, Auto Error Fixing, and Turbo Edits.\\nEnhanced AI models and streamlined workflow for better development experience.\\nPlease donate to help keep the app running and provide updates!"
+  },
+  "beta": {
+    "version": "1.0.4-beta",
+    "downloadUrl": "https://github.com/iotserver24/codex/releases/tag/v1.0.4-beta",
+    "releaseNotes": "Beta version with experimental features and latest improvements.\\nIncludes advanced AI context optimization and enhanced deployment options.\\nThis is a pre-release version - use at your own risk.\\nPlease donate to support development!"
+  }
+}

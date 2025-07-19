@@ -63,18 +63,14 @@ export async function onReady() {
 
   logger.info("Auto-update enabled=", settings.enableAutoUpdate);
   if (settings.enableAutoUpdate) {
-    // Technically we could just pass the releaseChannel directly to the host,
-    // but this is more explicit and falls back to stable if there's an unknown
-    // release channel.
-    const postfix = settings.releaseChannel === "beta" ? "beta" : "stable";
-    const host = `https://api.codex.anishkumar.tech/v1/update/${postfix}`;
-    logger.info("Auto-update release channel=", postfix);
+    // Use the single version.json endpoint for both stable and beta
+    logger.info("Auto-update using version.json endpoint");
     updateElectronApp({
       logger,
       updateSource: {
         type: UpdateSourceType.ElectronPublicUpdateService,
         repo: "iotserver24/codex",
-        host,
+        host: "https://codex.anishkumar.tech",
       },
     }); // additional configuration options available
   }

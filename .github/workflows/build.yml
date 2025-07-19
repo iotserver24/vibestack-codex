@@ -1,4 +1,4 @@
-name: Build and Release Codex v1.0.2
+name: Build and Release Codex v1.0.3
 
 on:
   push:
@@ -6,95 +6,32 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-linux:
-    runs-on: ubuntu-latest
+  build-and-publish:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-15, windows-latest]
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: macos-15
+            platform: macos
+          - os: windows-latest
+            platform: windows
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install & Build (Linux)
-        run: |
-          npm ci
-          npm run make
-      - name: Upload .deb and .rpm
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux
-          path: |
-            out/make/deb/x64/*.deb
-            out/make/rpm/x64/*.rpm
-
-  build-macos:
-    runs-on: macos-15
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Install & Build (macOS)
-        run: |
-          npm ci
-          npm run make
-      - name: Upload .zip (macOS)
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos
-          path: out/make/zip/darwin/arm64/*.zip
-
-  build-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-      - name: Install & Build (Windows)
-        run: |
-          npm ci
-          npm run make
-      - name: Upload .exe (Windows)
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows
-          path: out/make/squirrel.windows/x64/*.exe
-
-  publish:
-    needs: [build-linux, build-macos, build-windows]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Linux Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: linux
-          path: artifacts/
-      - name: Download macOS Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: macos
-          path: artifacts/
-      - name: Download Windows Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: windows
-          path: artifacts/
-      - name: Publish GitHub Release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: v1.0.0
-          name: Release v1.0.0
-          owner: iotserver24
-          repo: codex
-          allowUpdates: true
-          removeArtifacts: false
-          replacesArtifacts: true
-          makeLatest: true
-          token: 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
-          artifacts: |
-            artifacts/*.deb
-            artifacts/*.rpm
-            artifacts/*.zip
-            artifacts/*.exe
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Universal Package
+        run: npm run make
+        env:
+          # Force universal builds for all architectures
+          ELECTRON_FORGE_ARCH: "x64,arm64"
+      - name: Publish to GitHub Releases
+        run: npm run publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

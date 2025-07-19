@@ -3,49 +3,29 @@ import { MakerSquirrel } from "@electron-forge/maker-squirrel";
 import { MakerZIP } from "@electron-forge/maker-zip";
 import { MakerDeb } from "@electron-forge/maker-deb";
 import { MakerRpm } from "@electron-forge/maker-rpm";
+import { MakerDMG } from "@electron-forge/maker-dmg";
 import { VitePlugin } from "@electron-forge/plugin-vite";
 import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { FuseV1Options, FuseVersion } from "@electron/fuses";
 import { AutoUnpackNativesPlugin } from "@electron-forge/plugin-auto-unpack-natives";
 
-// Based on https://github.com/electron/forge/blob/6b2d547a7216c30fde1e1fddd1118eee5d872945/packages/plugin/vite/src/VitePlugin.ts#L124
 const ignore = (file: string) => {
   if (!file) return false;
-  // `file` always starts with `/`
-  // @see - https://github.com/electron/packager/blob/v18.1.3/src/copy-filter.ts#L89-L93
-  if (file === "/node_modules") {
-    return false;
-  }
-  if (file.startsWith("/drizzle")) {
-    return false;
-  }
-  if (file.startsWith("/scaffold")) {
-    return false;
-  }
 
-  if (file.startsWith("/worker") && !file.startsWith("/workers")) {
-    return false;
-  }
-  if (file.startsWith("/node_modules/stacktrace-js")) {
-    return false;
-  }
-  if (file.startsWith("/node_modules/stacktrace-js/dist")) {
-    return false;
-  }
-  if (file.startsWith("/node_modules/better-sqlite3")) {
-    return false;
-  }
-  if (file.startsWith("/node_modules/bindings")) {
-    return false;
-  }
-  if (file.startsWith("/node_modules/file-uri-to-path")) {
-    return false;
-  }
-  if (file.startsWith("/.vite")) {
-    return false;
-  }
+  const pathsToIgnore = [
+    "/node_modules",
+    "/drizzle",
+    "/scaffold",
+    "/worker",
+    "/node_modules/stacktrace-js",
+    "/node_modules/stacktrace-js/dist",
+    "/node_modules/better-sqlite3",
+    "/node_modules/bindings",
+    "/node_modules/file-uri-to-path",
+    "/.vite",
+  ];
 
-  return true;
+  return !pathsToIgnore.some((path) => file.startsWith(path));
 };
 
 const isEndToEndTestBuild = process.env.E2E_TEST_BUILD === "true";
@@ -54,43 +34,75 @@ const config: ForgeConfig = {
   packagerConfig: {
     protocols: [
       {
-        name: "Dyad",
-        schemes: ["dyad"],
+        name: "CodeX",
+        schemes: ["codex"],
       },
     ],
     icon: "./assets/icon/logo",
-
-    osxSign: isEndToEndTestBuild
-      ? undefined
-      : {
-          identity: process.env.APPLE_TEAM_ID,
-        },
-    osxNotarize: isEndToEndTestBuild
-      ? undefined
-      : {
-          appleId: process.env.APPLE_ID!,
-          appleIdPassword: process.env.APPLE_PASSWORD!,
-          teamId: process.env.APPLE_TEAM_ID!,
-        },
+    // Disable code signing for unsigned builds
+    osxSign: undefined,
+    osxNotarize: undefined,
     asar: true,
     ignore,
-    // ignore: [/node_modules\/(?!(better-sqlite3|bindings|file-uri-to-path)\/)/],
+    executableName: "codex",
   },
   rebuildConfig: {
     extraModules: ["better-sqlite3"],
     force: true,
   },
   makers: [
+    // Windows - Universal build (x64 + arm64)
     new MakerSquirrel({
-      signWithParams: `/sha1 ${process.env.SM_CODE_SIGNING_CERT_SHA1_HASH} /tr http://timestamp.digicert.com /td SHA256 /fd SHA256`,
+      // Disable code signing for unsigned builds
+      certificateFile: undefined,
+      certificatePassword: undefined,
     }),
+    // Windows ZIP - Universal build
+    new MakerZIP({}, ["win32"]),
+    // macOS - Universal build (x64 + arm64)
     new MakerZIP({}, ["darwin"]),
-    new MakerRpm({}),
+    // macOS DMG - Universal build
+    new MakerDMG({
+      name: "CodeX-macOS-Universal",
+      icon: "./assets/icon/logo.icns",
+      background: "./assets/icon/logo.png",
+      contents: [
+        {
+          x: 130,
+          y: 220,
+          type: "file",
+          path: "CodeX.app",
+        },
+        {
+          x: 410,
+          y: 220,
+          type: "link",
+          path: "/Applications",
+        },
+      ],
+    }),
+    // Linux DEB - Universal build
     new MakerDeb({
       options: {
-        mimeType: ["x-scheme-handler/dyad"],
+        name: "codex",
+        productName: "CodeX",
+        description: "AI-Powered Code Generation & Deployment",
+        mimeType: ["x-scheme-handler/codex"],
+        categories: ["Development"],
+        maintainer: "iotserver24@gmail.com",
+        homepage: "https://codex.anishkumar.tech",
       },
     }),
+    // Linux RPM - Universal build
+    new MakerRpm({
+      options: {
+        name: "codex",
+        productName: "CodeX",
+        description: "AI-Powered Code Generation & Deployment",
+        categories: ["Development"],
+      },
+    }),
+    // Linux AppImage maker not available, using ZIP instead
   ],
   publishers: [
     {
@@ -108,11 +120,8 @@ const config: ForgeConfig = {
   plugins: [
     new AutoUnpackNativesPlugin({}),
     new VitePlugin({
-      // `build` can specify multiple entry builds, which can be Main process, Preload scripts, Worker process, etc.
-      // If you are familiar with Vite configuration, it will look really familiar.
       build: [
         {
-          // `entry` is just an alias for `build.lib.entry` in the corresponding file of `config`.
           entry: "src/main.ts",
           config: "vite.main.config.mts",
           target: "main",
@@ -121,11 +130,6 @@ const config: ForgeConfig = {
           entry: "src/preload.ts",
           config: "vite.preload.config.mts",
           target: "preload",
-        },
-        {
-          entry: "workers/tsc/tsc_worker.ts",
-          config: "vite.worker.config.mts",
-          target: "main",
         },
       ],
       renderer: [
