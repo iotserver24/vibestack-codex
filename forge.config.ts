@@ -52,6 +52,7 @@ const ignore = (file: string) => {
 };
 
 const isEndToEndTestBuild = process.env.E2E_TEST_BUILD === "true";
+const isProductionBuild = process.env.NODE_ENV === "production";
 
 const config: ForgeConfig = {
   packagerConfig: {
@@ -63,18 +64,24 @@ const config: ForgeConfig = {
     ],
     icon: "./assets/icon/logo",
 
+    // Code signing configuration
     osxSign: isEndToEndTestBuild
       ? undefined
-      : {
-          identity: process.env.APPLE_TEAM_ID,
-        },
+      : isProductionBuild
+        ? {
+            identity: "CodeX macOS Code Signing", // Self-signed certificate name
+            keychain: process.env.KEYCHAIN_PATH || "login",
+          }
+        : undefined,
     osxNotarize: isEndToEndTestBuild
       ? undefined
-      : {
-          appleId: process.env.APPLE_ID!,
-          appleIdPassword: process.env.APPLE_PASSWORD!,
-          teamId: process.env.APPLE_TEAM_ID!,
-        },
+      : isProductionBuild
+        ? {
+            appleId: process.env.APPLE_ID,
+            appleIdPassword: process.env.APPLE_PASSWORD,
+            teamId: process.env.APPLE_TEAM_ID,
+          }
+        : undefined,
     asar: true,
     ignore,
     // ignore: [/node_modules\/(?!(better-sqlite3|bindings|file-uri-to-path)\/)/],
@@ -85,7 +92,9 @@ const config: ForgeConfig = {
   },
   makers: [
     new MakerSquirrel({
-      signWithParams: `/sha1 ${process.env.SM_CODE_SIGNING_CERT_SHA1_HASH} /tr http://timestamp.digicert.com /td SHA256 /fd SHA256`,
+      signWithParams: isProductionBuild
+        ? `/sha1 ${process.env.SM_CODE_SIGNING_CERT_SHA1_HASH} /tr http://timestamp.digicert.com /td SHA256 /fd SHA256`
+        : undefined,
     }),
     new MakerZIP({}, ["darwin"]),
     new MakerRpm({}),

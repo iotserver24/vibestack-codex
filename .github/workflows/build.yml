@@ -20,7 +20,7 @@ jobs:
           npm ci
           npm run make
         env:
-          E2E_TEST_BUILD: "true"
+          NODE_ENV: "production"
 
       - name: Debug Build Output (Linux)
         run: |
@@ -50,7 +50,7 @@ jobs:
           npm ci
           npm run make
         env:
-          E2E_TEST_BUILD: "true"
+          NODE_ENV: "production"
       - name: Debug Build Output (macOS)
         run: |
           echo "=== Build Output Structure ==="
@@ -79,7 +79,7 @@ jobs:
           npm ci
           npm run make
         env:
-          E2E_TEST_BUILD: "true"
+          NODE_ENV: "production"
       - name: Debug Build Output (Windows)
         run: |
           echo "=== Build Output Structure ==="
