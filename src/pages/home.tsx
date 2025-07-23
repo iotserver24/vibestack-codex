@@ -19,9 +19,11 @@ import { HomeChatInput } from "@/components/chat/HomeChatInput";
 import { generateCuteAppName } from "@/lib/utils";
 import { showError } from "@/lib/toast";
 
+import type { FileAttachment } from "@/ipc/ipc_types";
+
 // Adding an export for attachments
 export interface HomeSubmitOptions {
-  attachments?: File[];
+  attachments?: FileAttachment[];
 }
 
 export default function HomePage() {
