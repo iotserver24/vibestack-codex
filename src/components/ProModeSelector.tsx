@@ -13,8 +13,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Sparkles, Info } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
-import { IpcClient } from "@/ipc/ipc_client";
-import { hasDyadProKey } from "@/lib/schemas";
 
 export function ProModeSelector() {
   const { settings, updateSettings } = useSettings();
@@ -37,10 +35,6 @@ export function ProModeSelector() {
       enableDyadPro: !settings?.enableDyadPro,
     });
   };
-
-  // Always true for Pro
-  const hasProKey = true;
-  const proModeTogglable = true;
 
   return (
     <Popover>

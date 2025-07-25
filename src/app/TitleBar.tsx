@@ -2,7 +2,6 @@ import { useAtom } from "jotai";
 import { selectedAppIdAtom } from "@/atoms/appAtoms";
 import { useLoadApps } from "@/hooks/useLoadApps";
 import { useRouter, useLocation } from "@tanstack/react-router";
-import { useSettings } from "@/hooks/useSettings";
 import { Button } from "@/components/ui/button";
 // @ts-ignore
 import logo from "../../assets/logo_transparent.png";
@@ -27,7 +26,6 @@ export const TitleBar = () => {
   const { apps } = useLoadApps();
   const { navigate } = useRouter();
   const location = useLocation();
-  const { settings, refreshSettings } = useSettings();
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
   const [showWindowControls, setShowWindowControls] = useState(false);
 
@@ -71,10 +69,6 @@ export const TitleBar = () => {
       navigate({ to: "/app-details", search: { appId: selectedApp.id } });
     }
   };
-
-  // Always treat as Pro
-  const isDyadPro = true;
-  const isDyadProEnabled = true;
 
   return (
     <>

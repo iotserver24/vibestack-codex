@@ -9,6 +9,7 @@ import { eq } from "drizzle-orm";
 export const PROVIDERS_THAT_SUPPORT_THINKING: (keyof typeof MODEL_OPTIONS)[] = [
   "google",
   "auto",
+  "codex",
 ];
 
 export interface ModelOption {
@@ -152,7 +153,7 @@ export const MODEL_OPTIONS: Record<string, ModelOption[]> = {
       contextWindow: 1_000_000,
     },
   ],
-  pollination: [
+  codex: [
     {
       name: "bidara",
       displayName: "BIDARA - Biomimetic Designer by NASA",
@@ -273,7 +274,7 @@ export const PROVIDER_TO_ENV_VAR: Record<string, string> = {
   anthropic: "ANTHROPIC_API_KEY",
   google: "GEMINI_API_KEY",
   openrouter: "OPENROUTER_API_KEY",
-  pollination: "POLLINATION_API_KEY",
+  codex: "CODEX_API_KEY",
 };
 
 export const CLOUD_PROVIDERS: Record<
@@ -309,10 +310,10 @@ export const CLOUD_PROVIDERS: Record<
     websiteUrl: "https://openrouter.ai/settings/keys",
     gatewayPrefix: "openrouter/",
   },
-  pollination: {
-    displayName: "Pollination AI",
+  codex: {
+    displayName: "CodeX Provider",
+    websiteUrl: "https://codex.anishkumar.tech/", // update to your preferred URL
     hasFreeTier: false,
-    websiteUrl: "https://pollinations.ai/",
     gatewayPrefix: "",
   },
   auto: {

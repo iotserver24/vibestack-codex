@@ -1,10 +1,4 @@
-import { useNavigate } from "@tanstack/react-router";
-import {
-  CheckCircle,
-  AlertCircle,
-  XCircle,
-  Loader2,
-} from "lucide-react";
+import { CheckCircle, AlertCircle, XCircle, Loader2 } from "lucide-react";
 
 import { useState, useEffect, useCallback } from "react";
 import { IpcClient } from "@/ipc/ipc_client";
@@ -27,9 +21,9 @@ type NodeInstallStep =
 
 export function SetupBanner() {
   const posthog = usePostHog();
-  const navigate = useNavigate();
-  const { isAnyProviderSetup, isLoading: loading } =
-    useLanguageModelProviders();
+  const {
+    /* isAnyProviderSetup, isLoading: loading */
+  } = useLanguageModelProviders();
   const [nodeSystemInfo, setNodeSystemInfo] = useState<NodeSystemInfo | null>(
     null,
   );

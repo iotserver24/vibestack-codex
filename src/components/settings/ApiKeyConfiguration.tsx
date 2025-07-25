@@ -6,7 +6,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { UserSettings } from "@/lib/schemas";
 
@@ -34,15 +33,10 @@ interface ApiKeyConfigurationProps {
 
 export function ApiKeyConfiguration({
   provider,
-  providerDisplayName,
   settings,
   envVars,
   envVarName,
   isSaving,
-  saveError,
-  apiKeyInput,
-  onApiKeyInputChange,
-  onSaveKey,
   onDeleteKey,
   isDyad,
 }: ApiKeyConfigurationProps) {
@@ -69,10 +63,9 @@ export function ApiKeyConfiguration({
     defaultAccordionValue.push("env-key");
   }
 
-  const isPollination = provider === "pollination";
-  const defaultPollinationKey = "uNoesre5jXDzjhiY"; // Example default key, replace with your actual default
-  const showDelete = !isPollination;
-  const showKey = !isPollination;
+  const isCodex = provider === "codex";
+  const showDelete = !isCodex;
+  const showKey = !isCodex;
 
   return (
     <Accordion
@@ -94,16 +87,16 @@ export function ApiKeyConfiguration({
               <AlertTitle className="flex justify-between items-center">
                 <span>Current Key (Settings)</span>
                 {showDelete && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={onDeleteKey}
-                  disabled={isSaving}
-                  className="flex items-center gap-1 h-7 px-2"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  {isSaving ? "Deleting..." : "Delete"}
-                </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={onDeleteKey}
+                    disabled={isSaving}
+                    className="flex items-center gap-1 h-7 px-2"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    {isSaving ? "Deleting..." : "Delete"}
+                  </Button>
                 )}
               </AlertTitle>
               <AlertDescription>
@@ -116,43 +109,20 @@ export function ApiKeyConfiguration({
               </AlertDescription>
             </Alert>
           )}
-          {isPollination && (
+          {isCodex && (
             <Alert variant="default" className="mb-4">
               <KeyRound className="h-4 w-4" />
               <AlertTitle>Default Key (Free)</AlertTitle>
               <AlertDescription>
                 <p className="font-mono text-sm">************</p>
                 <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                  This key is always active unless you set your own.
+                  This key is always active and managed by CodeX.
                 </p>
               </AlertDescription>
             </Alert>
           )}
 
-          <div className="space-y-2">
-            <label
-              htmlFor="apiKeyInput"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              {isValidUserKey ? "Update" : "Set"} {providerDisplayName} API Key
-            </label>
-            <div className="flex items-start space-x-2">
-              <Input
-                id="apiKeyInput"
-                value={apiKeyInput}
-                onChange={(e) => onApiKeyInputChange(e.target.value)}
-                placeholder={`Enter new ${providerDisplayName} API Key here`}
-                className={`flex-grow ${saveError ? "border-red-500" : ""}`}
-              />
-              <Button onClick={onSaveKey} disabled={isSaving || !apiKeyInput}>
-                {isSaving ? "Saving..." : "Save Key"}
-              </Button>
-            </div>
-            {saveError && <p className="text-xs text-red-600">{saveError}</p>}
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Setting a key here will override the default free key.
-            </p>
-          </div>
+          {/* Remove any UI for entering API key for codex */}
         </AccordionContent>
       </AccordionItem>
 

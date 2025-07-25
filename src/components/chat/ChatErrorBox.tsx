@@ -15,33 +15,25 @@ export function ChatErrorBox({
   // Remove all upgrade/paywall prompts
   if (error.includes("doesn't have a free quota tier")) {
     return (
-      <ChatErrorContainer onDismiss={onDismiss}>
-        {error}
-      </ChatErrorContainer>
+      <ChatErrorContainer onDismiss={onDismiss}>{error}</ChatErrorContainer>
     );
   }
   if (error.includes("https://ai.google.dev/gemini-api/docs/rate-limits")) {
     return (
-      <ChatErrorContainer onDismiss={onDismiss}>
-        {error}
-      </ChatErrorContainer>
+      <ChatErrorContainer onDismiss={onDismiss}>{error}</ChatErrorContainer>
     );
   }
   if (error.includes("LiteLLM Virtual Key expected")) {
     return (
       <ChatInfoContainer onDismiss={onDismiss}>
-        <span>
-          Looks like you don't have a valid key.
-        </span>
+        <span>Looks like you don't have a valid key.</span>
       </ChatInfoContainer>
     );
   }
   if (isDyadProEnabled && error.includes("ExceededBudget:")) {
     return (
       <ChatInfoContainer onDismiss={onDismiss}>
-        <span>
-          You have used all of your AI credits this month.
-        </span>
+        <span>You have used all of your AI credits this month.</span>
       </ChatInfoContainer>
     );
   }
@@ -50,23 +42,6 @@ export function ChatErrorBox({
     error = error.split("Fallbacks=")[0];
   }
   return <ChatErrorContainer onDismiss={onDismiss}>{error}</ChatErrorContainer>;
-}
-
-function ExternalLink({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <a
-      className="underline cursor-pointer text-blue-500 hover:text-blue-700"
-      onClick={() => IpcClient.getInstance().openExternalUrl(href)}
-    >
-      {children}
-    </a>
-  );
 }
 
 function ChatErrorContainer({

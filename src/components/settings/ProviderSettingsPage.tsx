@@ -10,7 +10,6 @@ import {} from "@/components/ui/accordion";
 
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { showError } from "@/lib/toast";
 import { UserSettings } from "@/lib/schemas";
 
 import { ProviderSettingsHeader } from "./ProviderSettingsHeader";
@@ -123,20 +122,6 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
     } catch (error: any) {
       console.error("Error deleting API key:", error);
       setSaveError(error.message || "Failed to delete API key.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // --- Toggle Dyad Pro Handler ---
-  const handleToggleDyadPro = async (enabled: boolean) => {
-    setIsSaving(true);
-    try {
-      await updateSettings({
-        enableDyadPro: enabled,
-      });
-    } catch (error: any) {
-      showError(`Error toggling CodeX Pro: ${error}`);
     } finally {
       setIsSaving(false);
     }
@@ -272,11 +257,7 @@ export function ProviderSettingsPage({ provider }: ProviderSettingsPageProps) {
                 Dyad Pro is always enabled in this build.
               </p>
             </div>
-            <Switch
-              checked={true}
-              onCheckedChange={() => {}}
-              disabled={true}
-            />
+            <Switch checked={true} onCheckedChange={() => {}} disabled={true} />
           </div>
         )}
 

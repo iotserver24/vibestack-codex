@@ -157,9 +157,20 @@ export async function getModelClient(
         );
       }
     }
-    // If no models have API keys, throw an error
-    throw new Error(
-      "No API keys available for any model supported by the 'auto' provider.",
+    // PATCH: If no API keys, fall back to the first available codex model
+    logger.warn(
+      "No API keys found for AUTO_MODELS, falling back to codex free model.",
+    );
+    const codexModels =
+      allProviders.find((p) => p.id === "codex")?.models || [];
+    const fallbackModel = codexModels[0]?.name || "bidara";
+    return await getModelClient(
+      {
+        provider: "codex",
+        name: fallbackModel,
+      },
+      settings,
+      files,
     );
   }
   return getRegularModelClient(model, settings, providerConfig);
@@ -172,11 +183,10 @@ function getRegularModelClient(
 ) {
   // Get API key for the specific provider
   const apiKey =
-    settings.providerSettings?.[model.provider]?.apiKey?.value ||
     (providerConfig.envVarName
       ? getEnvVar(providerConfig.envVarName)
       : undefined) ||
-    (model.provider === "pollination" ? "uNoesre5jXDzjhiY" : undefined);
+    (model.provider === "codex" ? "uNoesre5jXDzjhiY" : undefined);
 
   const providerId = providerConfig.id;
   // Create client based on provider ID or type
@@ -221,21 +231,11 @@ function getRegularModelClient(
         backupModelClients: [],
       };
     }
-    case "pollination": {
-      let userToken =
-        settings.providerSettings?.[model.provider]?.apiKey?.value;
-      if (
-        !userToken ||
-        userToken === "Not Set" ||
-        userToken === "Invalid Key" ||
-        userToken.trim() === ""
-      ) {
-        userToken = "uNoesre5jXDzjhiY"; // Default free token
-      }
+    case "codex": {
       const provider = createOpenAICompatible({
-        name: "pollination",
-        baseURL: "https://text.pollinations.ai/openai/v1",
-        apiKey: userToken,
+        name: "codex",
+        baseURL: "https://text.codex.anishkumar.tech/openai/v1",
+        apiKey,
       });
       return {
         modelClient: {
